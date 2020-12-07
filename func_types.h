@@ -1,9 +1,17 @@
 #ifndef _FUNC_TYPES_H_
 #define _FUNC_TYPES_H_
+/* Define special symbol for GCC compilers. */
+#if (defined(__GNUC__) || defined(__GNUG__)) && !defined(__clang__)
+#define GCC_DEFINED
+#endif
+/* Include common headers. */
 #include <type_traits>
 #include <string>
 #include <stdexcept>
+/* Include GCC-specific name de-mangling header. */
+#ifdef GCC_DEFINED
 #include <cxxabi.h>
+#endif
 
 /**
  * Class that encapsulates a function pointer.
@@ -109,19 +117,17 @@ public:
     };
 
 private:
-    static std::string get_type_name()
+    static const char* get_type_name()
     {
-        std::string temp_name = typeid(func_t).name();
-#if !defined(__clang__) && (defined(__GNUC__) || defined(__GNUG__))
-        // De-mangling only works for GCC.
-        int status;
-        char *demangled_name = abi::__cxa_demangle(temp_name.c_str(), NULL, NULL, &status);
-        if(!status) {
-            temp_name = demangled_name;
-            std::free(demangled_name);
-        }
+        const char* result_name = typeid(func_t).name();
+#ifdef GCC_DEFINED
+        // De-mangling uses GCC-specific functions.
+        int error_code;
+        char *demangled_name = abi::__cxa_demangle(result_name, NULL, NULL, &error_code);
+        if(!error_code)
+            result_name = demangled_name;
 #endif
-        return temp_name;
+        return result_name;
     }
 };
 

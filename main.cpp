@@ -15,18 +15,13 @@ return_t apply(func_t<return_t, param_t ...> fn, param_t ... params)
 struct NoDefault
 {
     NoDefault() = delete;
-    friend std::ostream &operator<<(std::ostream &os, const NoDefault&)
-    {
-        return os;
-    }
 };
 
 int main()
 {
-    // won't compile -> NoDefault is not default constructible
-    //func_t<NoDefault> f1;
+    // func_t<NoDefault> f1; /* won't compile, NoDefault is not default constructible */
 
-    // OK -> int has a default constructor, calling f2 will return 0
+    // OK, int has a default constructor, calling f2 will return 0
     func_t<int> f2;
     std::cout << "Type of f2 is " << f2.name() << '\n';
     std::cout << "f2() = " << f2() << '\n' << '\n';
