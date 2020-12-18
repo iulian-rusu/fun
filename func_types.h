@@ -108,7 +108,7 @@ public:
         static_assert(sizeof ...(param_t) == 1, "function with multiple parameters cannot be composed");
         return [&](other_param_t ... params)
         {
-            return func_ptr(other_func.func_ptr(params ...));
+            return func_ptr(other_func(params ...));
         };
     }
 

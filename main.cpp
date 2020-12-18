@@ -17,15 +17,20 @@ struct NoDefault
     NoDefault() = delete;
 };
 
+int increment(int x)
+{
+    return x + 1;
+}
+
 int main()
 {
     // func_t<NoDefault> f1; /* won't compile, NoDefault is not default constructible */
 
     // OK, int has a default constructor, calling f2 will return 0
-    func_t<int> f2;
-    std::cout << "Type of f2 is:\t\t\t\t\t" << f2.class_type_name << '\n';
-    std::cout << "Type of f2's pointer is:\t\t" << f2.ptr_type_name << '\n';
-    std::cout << "f2() = " << f2() << '\n' << '\n';
+    func_t<int> def_func;
+    std::cout << "Type of def_func is:\t\t\t\t" << def_func.class_type_name << '\n';
+    std::cout << "Type of def_func's pointer is:\t\t" << def_func.ptr_type_name << '\n';
+    std::cout << "def_func() = " << def_func() << '\n' << '\n';
 
     // creating a partial from a given function
     func_t sum_func = sum_them;
