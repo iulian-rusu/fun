@@ -19,7 +19,7 @@
  * Template for wrapper over a function pointer.
  *
  * @tparam return_t The return type of the function.
- * @tparam Params The parameter types taken by the function. Can be empty.
+ * @tparam Params The parameter types taken by the function. May be missing.
  */
 template<typename return_t, typename ... Params>
 class function
@@ -108,6 +108,7 @@ public:
             return fptr(partial_params ..., rest_params ...);
         };
     }
+
     /**
      * Returns a lambda that captures the functional composition of this object and the received object.
      * This method requires that Params is of size 1.

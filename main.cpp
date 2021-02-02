@@ -32,7 +32,7 @@ int main()
     // partial_func will capture the first parameter as 10.
     auto partial_func = sum_func.partial(10);
     // Call the partial, providing the rest of the parameters.
-    std::cout << "sum_func.(10, 20, 30) = " <<  partial_func(20u, 30L) << '\n' << '\n';
+    std::cout << "sum_func(10, 20, 30) = " <<  partial_func(20u, 30L) << '\n' << '\n';
 
     // We can also make functions that take other functions as parameters.
     function applier = apply<long, int, unsigned, long>;
