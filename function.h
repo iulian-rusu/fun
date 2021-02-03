@@ -1,5 +1,5 @@
-#ifndef __FUNCTIONAL_H__
-#define __FUNCTIONAL_H__
+#ifndef __FUNCTION_H__
+#define __FUNCTION_H__
 
 /* Define special symbol for GCC compilers. */
 #if (defined(__GNUC__) || defined(__GNUG__)) && !defined(__clang__)
@@ -18,38 +18,38 @@
 /**
  * Template for wrapper over a function pointer.
  *
- * @tparam return_t The return type of the function.
+ * @tparam Return The return type of the function.
  * @tparam Params The parameter types taken by the function. May be missing.
  */
-template<typename return_t, typename ... Params>
-class function
+template<typename Return, typename ... Params>
+class Function
 {
-    return_t (*fptr)(Params ...);
+    Return (*fptr)(Params ...);
 
 public:
     static const std::string_view fptr_name;
     static const std::string_view class_name;
 
-    constexpr function() noexcept: fptr(defaults::default_function) {}
+    constexpr Function() noexcept: fptr(Function::default_function) {}
 
-    constexpr function(function<return_t, Params ...> const &other) noexcept = default;
+    constexpr Function(Function<Return, Params ...> const &other) noexcept = default;
 
-    constexpr function(return_t (*func)(Params ...)) noexcept: fptr(func) {}
+    constexpr Function(Return (*func)(Params ...)) noexcept: fptr(func) {}
 
-    template<typename F>
-    constexpr function(F const &lambda)
+    template<typename Lambda>
+    constexpr Function(Lambda const &lambda)
     {
-        static_assert(std::is_convertible_v<F, decltype(fptr)>, "cannot convert lambda to function pointer");
+        static_assert(std::is_convertible_v<Lambda, decltype(fptr)>, "cannot convert lambda to function pointer");
         fptr = lambda;
     }
 
-    function &operator=(return_t (*func)(Params ...)) noexcept
+    Function &operator=(Return (*func)(Params ...)) noexcept
     {
         fptr = func;
         return *this;
     }
 
-    function &operator=(function<return_t, Params ...> const &other) noexcept
+    Function &operator=(Function<Return, Params ...> const &other) noexcept
     {
         if (this == &other)
             return *this;
@@ -57,48 +57,46 @@ public:
         return *this;
     }
 
-    template<typename F>
-    function &operator=(F const &lambda)
+    template<typename Lambda>
+    Function &operator=(Lambda const &lambda)
     {
-        static_assert(std::is_convertible_v<F, decltype(fptr)>, "cannot convert lambda to function pointer");
+        static_assert(std::is_convertible_v<Lambda, decltype(fptr)>, "cannot convert lambda to function pointer");
         fptr = lambda;
         return *this;
     }
 
     /**
-     * This overload is [[nodiscard]] and is enabled if return_t is not void.
+     * This overload is [[nodiscard]] and is enabled if Return is not void.
      *
-     * @tparam maybe_void_t Type used to check if the return type is void.
-     * @param params Pack of parameters used to call the function.
-     * @return A value of type return_t, the result of the function call.
+     * @tparam R Template parameter used for SFINAE template type deduction.
+     * @param params Pack of parameters used to call the Function.
+     * @return A value of type Return, the result of the Function call.
      */
-    template<typename maybe_void_t = return_t,
-            typename std::enable_if_t<!std::is_void_v<maybe_void_t>> * = nullptr>
-    [[nodiscard]] return_t operator()(Params ... params) const
+     template<typename R = Return>
+    [[nodiscard]] auto operator()(Params ... params) const -> std::enable_if_t<!std::is_void_v<R>, R>
     {
         return fptr(params ...);
     }
 
     /**
-    * This overload's return is void and can be discarded.
+    * This overload's return type is void and can be discarded.
     *
-    * @tparam maybe_void_t Type used to check if the return type is void.
-    * @param params Pack of parameters used to call the function.
-    * @return A value of type return_t, the result of the function call.
+    * @tparam R Template parameter used for SFINAE template type deduction.
+    * @param params Pack of parameters used to call the Function.
+    * @return A value of type Return, the result of the Function call.
     */
-    template<typename maybe_void_t = return_t,
-            typename std::enable_if_t<std::is_void_v<maybe_void_t>> * = nullptr>
-    void operator()(Params ... params) const
+    template<typename R = Return>
+    auto operator()(Params ... params) const -> std::enable_if_t<std::is_void_v<R>, void>
     {
         fptr(params ...);
     }
 
     /**
-     * Returns a lambda that captures a partial state of the original function.
+     * Returns a lambda that captures a partial state of the original Function.
      *
      * @tparam PartialParams The types used in the partial state.
      * @param partial_params The actual parameters used to make the partial.
-     * @return A lambda capturing the partial state of the function.
+     * @return A lambda capturing the partial state of the Function.
      */
     template<typename ... PartialParams>
     [[nodiscard]] auto partial(PartialParams ... partial_params) const noexcept
@@ -119,7 +117,7 @@ public:
      * @return A lambda that represents the composition.
      */
     template<typename ... CompositionParams>
-    [[nodiscard]] auto composed_with(function<Params ..., CompositionParams ...> const &other_func) const noexcept
+    [[nodiscard]] auto composed_with(Function<Params ..., CompositionParams ...> const &other_func) const noexcept
     {
         static_assert(sizeof ...(Params) == 1, "function with multiple parameters cannot be composed");
         return [&](CompositionParams ... params)
@@ -128,22 +126,23 @@ public:
         };
     }
 
-    class defaults
+    /**
+     * Default static member function used to default construct a Function object.
+     * This function will be replaced with a different version for void return types using SFINAE.
+     *
+     * @tparam R Template parameter used for SFINAE template type deduction.
+     * @return A default constructed Return type object.
+     */
+    template<typename R = Return>
+    static auto default_function(Params ... ) -> std::enable_if_t<!std::is_void_v<R>, R>
     {
-    public:
-        template<typename maybe_void_t = return_t,
-                typename std::enable_if_t<!std::is_void_v<maybe_void_t>> * = nullptr>
-        static return_t default_function([[maybe_unused]] Params ... params)
-        {
-            static_assert(std::is_default_constructible_v<return_t>,
-                          "return type of default function must be default constructible");
-            return return_t{};
-        }
+        static_assert(std::is_default_constructible_v<R>,
+                      "return type of default function must be default constructible");
+        return R{};
+    }
 
-        template<typename maybe_void_t = return_t,
-                typename std::enable_if_t<std::is_void_v<maybe_void_t>> * = nullptr>
-        static void default_function([[maybe_unused]] Params ... params) noexcept {}
-    };
+    template<typename R = Return>
+    static auto default_function(Params ... ) noexcept -> std::enable_if_t<std::is_void_v<R>, void> {}
 };
 
 template<typename T>
@@ -160,19 +159,19 @@ static const char* get_type_name()
     return result_name;
 }
 
-template<typename return_t, typename ... Params>
-const std::string_view function<return_t, Params ...>::fptr_name = get_type_name<return_t (*)(Params ...)>();
+template<typename Return, typename ... Params>
+const std::string_view Function<Return, Params ...>::fptr_name = get_type_name<Return (*)(Params ...)>();
 
-template<typename return_t, typename ... Params>
-const std::string_view function<return_t, Params ...>::class_name = get_type_name<function>();
+template<typename Return, typename ... Params>
+const std::string_view Function<Return, Params ...>::class_name = get_type_name<Function>();
 
 template<typename ... Params>
-using action = function<void, Params ...>;
+using Action = Function<void, Params ...>;
 
 template<typename T, typename U>
-using comparator = function<bool, T, U>;
+using Comparator = Function<bool, T, U>;
 
 template<typename T>
-using predicate = function<bool, T>;
+using Predicate = Function<bool, T>;
 
-#endif // __FUNCTIONAL_H__
+#endif // __FUNCTION_H__
