@@ -1,5 +1,5 @@
-#ifndef _FUNC_TYPES_H_
-#define _FUNC_TYPES_H_
+#ifndef __FUNCTIONAL_H__
+#define __FUNCTIONAL_H__
 
 /* Define special symbol for GCC compilers. */
 #if (defined(__GNUC__) || defined(__GNUG__)) && !defined(__clang__)
@@ -27,8 +27,8 @@ class function
     return_t (*fptr)(Params ...);
 
 public:
-    static const std::string_view fptr_type_name;
-    static const std::string_view class_type_name;
+    static const std::string_view fptr_name;
+    static const std::string_view class_name;
 
     constexpr function() noexcept: fptr(defaults::default_function) {}
 
@@ -147,7 +147,7 @@ public:
 };
 
 template<typename T>
-static const char* demangled_type_name()
+static const char* get_type_name()
 {
     const char* result_name = typeid(T).name();
 #ifdef __GCC_COMPILER__
@@ -161,10 +161,10 @@ static const char* demangled_type_name()
 }
 
 template<typename return_t, typename ... Params>
-const std::string_view function<return_t, Params ...>::fptr_type_name = demangled_type_name<return_t (*)(Params ...)>();
+const std::string_view function<return_t, Params ...>::fptr_name = get_type_name<return_t (*)(Params ...)>();
 
 template<typename return_t, typename ... Params>
-const std::string_view function<return_t, Params ...>::class_type_name = demangled_type_name<function>();
+const std::string_view function<return_t, Params ...>::class_name = get_type_name<function>();
 
 template<typename ... Params>
 using action = function<void, Params ...>;
@@ -175,4 +175,4 @@ using comparator = function<bool, T, U>;
 template<typename T>
 using predicate = function<bool, T>;
 
-#endif // _FUNC_TYPES_H_
+#endif // __FUNCTIONAL_H__

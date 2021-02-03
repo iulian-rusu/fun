@@ -21,14 +21,14 @@ int main()
 {
     // OK, int has a default constructor, calling def_func will return 0.
     function<int> def_func;
-    std::cout << "Type of def_func is:\t\t\t\t" << def_func.class_type_name << '\n';
-    std::cout << "Type of def_func's pointer is:\t\t" << def_func.fptr_type_name << '\n';
+    std::cout << "Type of def_func is:\t\t\t\t" << def_func.class_name << '\n';
+    std::cout << "Type of def_func's pointer is:\t\t" << def_func.fptr_name << '\n';
     std::cout << "def_func() = " << def_func() << '\n' << '\n';
 
     // Creating a partial from a given function.
     function sum_func = sum_them;
-    std::cout << "Type of sum_func is:\t\t\t\t" << sum_func.class_type_name << '\n';
-    std::cout << "Type of sum_func's pointer is:\t\t" << sum_func.fptr_type_name << '\n';
+    std::cout << "Type of sum_func is:\t\t\t\t" << sum_func.class_name << '\n';
+    std::cout << "Type of sum_func's pointer is:\t\t" << sum_func.fptr_name << '\n';
     // partial_func will capture the first parameter as 10.
     auto partial_func = sum_func.partial(10);
     // Call the partial, providing the rest of the parameters.
@@ -36,8 +36,8 @@ int main()
 
     // We can also make functions that take other functions as parameters.
     function applier = apply<long, int, unsigned, long>;
-    std::cout << "Type of applier is:\t\t\t\t\t" << applier.class_type_name << '\n';
-    std::cout << "Type of applier's pointer is:\t\t" << applier.fptr_type_name << '\n';
+    std::cout << "Type of applier is:\t\t\t\t\t" << applier.class_name << '\n';
+    std::cout << "Type of applier's pointer is:\t\t" << applier.fptr_name << '\n';
     // Equivalent to sum_func(1, 2, 3)
     std::cout << "applier(sum_func, 1, 2, 3) = " << applier(sum_func, 1, 2u, 3L) << '\n' << '\n';
 
