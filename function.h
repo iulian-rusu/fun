@@ -169,9 +169,9 @@ template<typename ... Params>
 using Action = Function<void, Params ...>;
 
 template<typename T, typename U>
-using Comparator = Function<bool, T, U>;
+using Comparator = Function<bool, std::remove_reference_t<T> const &, std::remove_reference_t<U> const &>;
 
 template<typename T>
-using Predicate = Function<bool, T>;
+using Predicate = Function<bool, std::remove_reference_t<T> const &>;
 
 #endif // __FUNCTION_H__
