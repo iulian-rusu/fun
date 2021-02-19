@@ -22,7 +22,7 @@
  * @tparam Params The parameter types taken by the function. May be missing.
  */
 template<typename Return, typename ... Params>
-class Function
+class function
 {
     Return (*fptr)(Params ...);
 
@@ -30,26 +30,26 @@ public:
     static const std::string_view fptr_name;
     static const std::string_view class_name;
 
-    constexpr Function() noexcept: fptr(Function::default_function) {}
+    constexpr function() noexcept: fptr(function::default_function) {}
 
-    constexpr Function(Function<Return, Params ...> const &other) noexcept = default;
+    constexpr function(function<Return, Params ...> const &other) noexcept = default;
 
-    constexpr Function(Return (*func)(Params ...)) noexcept: fptr(func) {}
+    constexpr function(Return (*func)(Params ...)) noexcept: fptr(func) {}
 
     template<typename Lambda>
-    constexpr Function(Lambda const &lambda)
+    constexpr function(Lambda const &lambda)
     {
         static_assert(std::is_convertible_v<Lambda, decltype(fptr)>, "cannot convert lambda to function pointer");
         fptr = lambda;
     }
 
-    Function &operator=(Return (*func)(Params ...)) noexcept
+    function &operator=(Return (*func)(Params ...)) noexcept
     {
         fptr = func;
         return *this;
     }
 
-    Function &operator=(Function<Return, Params ...> const &other) noexcept
+    function &operator=(function<Return, Params ...> const &other) noexcept
     {
         if (this == &other)
             return *this;
@@ -58,7 +58,7 @@ public:
     }
 
     template<typename Lambda>
-    Function &operator=(Lambda const &lambda)
+    function &operator=(Lambda const &lambda)
     {
         static_assert(std::is_convertible_v<Lambda, decltype(fptr)>, "cannot convert lambda to function pointer");
         fptr = lambda;
@@ -69,8 +69,8 @@ public:
      * This overload is [[nodiscard]] and is enabled if Return is not void.
      *
      * @tparam R Template parameter used for SFINAE template type deduction.
-     * @param params Pack of parameters used to call the Function.
-     * @return A value of type Return, the result of the Function call.
+     * @param params Pack of parameters used to call the function.
+     * @return A value of type Return, the result of the function call.
      */
      template<typename R = Return>
     [[nodiscard]] auto operator()(Params ... params) const -> std::enable_if_t<!std::is_void_v<R>, R>
@@ -82,8 +82,8 @@ public:
     * This overload's return type is void and can be discarded.
     *
     * @tparam R Template parameter used for SFINAE template type deduction.
-    * @param params Pack of parameters used to call the Function.
-    * @return A value of type Return, the result of the Function call.
+    * @param params Pack of parameters used to call the function.
+    * @return A value of type Return, the result of the function call.
     */
     template<typename R = Return>
     auto operator()(Params ... params) const -> std::enable_if_t<std::is_void_v<R>, void>
@@ -92,11 +92,11 @@ public:
     }
 
     /**
-     * Returns a lambda that captures a partial state of the original Function.
+     * Returns a lambda that captures a partial state of the original function.
      *
      * @tparam PartialParams The types used in the partial state.
      * @param partial_params The actual parameters used to make the partial.
-     * @return A lambda capturing the partial state of the Function.
+     * @return A lambda capturing the partial state of the function.
      */
     template<typename ... PartialParams>
     [[nodiscard]] auto partial(PartialParams ... partial_params) const noexcept
@@ -117,7 +117,7 @@ public:
      * @return A lambda that represents the composition.
      */
     template<typename ... CompositionParams>
-    [[nodiscard]] auto composed_with(Function<Params ..., CompositionParams ...> const &other_func) const noexcept
+    [[nodiscard]] auto composed_with(function<Params ..., CompositionParams ...> const &other_func) const noexcept
     {
         static_assert(sizeof ...(Params) == 1, "function with multiple parameters cannot be composed");
         return [&](CompositionParams ... params)
@@ -127,7 +127,7 @@ public:
     }
 
     /**
-     * Default static member function used to default construct a Function object.
+     * Default static member function used to default construct a function object.
      * This function will be replaced with a different version for void return types using SFINAE.
      *
      * @tparam R Template parameter used for SFINAE template type deduction.
@@ -160,18 +160,18 @@ static const char* get_type_name()
 }
 
 template<typename Return, typename ... Params>
-const std::string_view Function<Return, Params ...>::fptr_name = get_type_name<Return (*)(Params ...)>();
+const std::string_view function<Return, Params ...>::fptr_name = get_type_name<Return (*)(Params ...)>();
 
 template<typename Return, typename ... Params>
-const std::string_view Function<Return, Params ...>::class_name = get_type_name<Function>();
+const std::string_view function<Return, Params ...>::class_name = get_type_name<function>();
 
 template<typename ... Params>
-using Action = Function<void, Params ...>;
+using action = function<void, Params ...>;
 
 template<typename T, typename U>
-using Comparator = Function<bool, std::remove_reference_t<T> const &, std::remove_reference_t<U> const &>;
+using comparator = function<bool, std::remove_reference_t<T> const &, std::remove_reference_t<U> const &>;
 
 template<typename T>
-using Predicate = Function<bool, std::remove_reference_t<T> const &>;
+using predicate = function<bool, std::remove_reference_t<T> const &>;
 
 #endif // __FUNCTION_H__
