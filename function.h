@@ -168,10 +168,25 @@ const std::string_view function<Return, Params ...>::class_name = get_type_name<
 template<typename ... Params>
 using action = function<void, Params ...>;
 
+// Helper type definition for more compact code.
+// Returns the raw type of T, stripped of any const, volatile or reference modifiers.
+template<typename T>
+using raw_type = std::remove_cvref_t<T>;
+
+// The type definition below adapt to trivially copyable types and pass them by value.
+// Non-trivially copyable types are passed by const reference.
+
 template<typename T, typename U>
-using comparator = function<bool, std::remove_reference_t<T> const &, std::remove_reference_t<U> const &>;
+using comparator = function<bool,
+    std::conditional_t<std::is_trivially_copyable_v<raw_type<T>>, raw_type<T>, raw_type<T> const &>,
+    std::conditional_t<std::is_trivially_copyable_v<raw_type<U>>, raw_type<U>, raw_type<U> const &>>;
 
 template<typename T>
-using predicate = function<bool, std::remove_reference_t<T> const &>;
+using predicate = function<bool,
+    std::conditional_t<std::is_trivially_copyable_v<raw_type<T>>, raw_type<T>, raw_type<T> const &>>;
+
+template<typename Return, typename T = Return>
+using transform = function<Return,
+    std::conditional_t<std::is_trivially_copyable_v<raw_type<T>>, raw_type<T>, raw_type<T> const &>>;
 
 #endif // __FUNCTION_H__

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include "function.h"
 
 long sum_them(int first, unsigned second, long third)
@@ -45,4 +46,9 @@ int main()
     // We have to specify all template types explicitly.
     action<std::string_view> print_message = [](std::string_view name){ std::cout << "Hello, " << name << "!\n";};
     print_message("John");
+
+    // Default constructing a comparator function.
+    // The actual types of the function parameters are int and std::vector<int> const &.
+    comparator<int const &, std::vector<int>> cmp;
+    std::cout << "Type of comparator is: \t" << cmp.class_name << '\n';
 }
