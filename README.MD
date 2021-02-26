@@ -8,4 +8,4 @@ Any `function` object that doesn't return `void` has its `operator()` automatica
 The `function` class template holds static functions used as default initializers. 
 Usage of the default constructor requires any non-void `Return` to be default constructible.
 
-The program requires at least C++17 due to the use of some specific `type_traits` definitions.
+The program requires at least C++20 due to the use of some specific `type_traits` members like `std::remove_cvref`.
