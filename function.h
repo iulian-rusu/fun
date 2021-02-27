@@ -12,7 +12,9 @@
 
 /* Include GCC-specific name de-mangling header. */
 #ifdef __GCC_COMPILER__
+
 #include <cxxabi.h>
+
 #endif
 
 /**
@@ -30,11 +32,13 @@ public:
     static const std::string_view fptr_name;
     static const std::string_view class_name;
 
-    constexpr function() noexcept: fptr(function::default_function) {}
+    constexpr function() noexcept: fptr(function::default_function)
+    {}
 
     constexpr function(function<Return, Params ...> const &other) noexcept = default;
 
-    constexpr function(Return (*func)(Params ...)) noexcept: fptr(func) {}
+    constexpr function(Return (*func)(Params ...)) noexcept: fptr(func)
+    {}
 
     template<typename Lambda>
     constexpr function(Lambda const &lambda)
@@ -72,8 +76,8 @@ public:
      * @param params Pack of parameters used to call the function.
      * @return A value of type Return, the result of the function call.
      */
-     template<typename R = Return>
-    [[nodiscard]] auto operator()(Params ... params) const -> std::enable_if_t<!std::is_void_v<R>, R>
+    template<typename R = Return>
+    [[nodiscard]] auto operator()(Params ...params) const -> std::enable_if_t<!std::is_void_v<R>, R>
     {
         return fptr(params ...);
     }
@@ -101,7 +105,7 @@ public:
     template<typename ... PartialParams>
     [[nodiscard]] auto partial(PartialParams ... partial_params) const noexcept
     {
-        return [&](auto &&... rest_params)
+        return [=](auto &&... rest_params)
         {
             return fptr(partial_params ..., rest_params ...);
         };
@@ -120,7 +124,7 @@ public:
     [[nodiscard]] auto composed_with(function<Params ..., CompositionParams ...> const &other_func) const noexcept
     {
         static_assert(sizeof ...(Params) == 1, "function with multiple parameters cannot be composed");
-        return [&](CompositionParams ... params)
+        return [=](CompositionParams ... params)
         {
             return fptr(other_func(params ...));
         };
@@ -134,7 +138,7 @@ public:
      * @return A default constructed Return type object.
      */
     template<typename R = Return>
-    static auto default_function(Params ... ) -> std::enable_if_t<!std::is_void_v<R>, R>
+    static auto default_function(Params ...) -> std::enable_if_t<!std::is_void_v<R>, R>
     {
         static_assert(std::is_default_constructible_v<R>,
                       "return type of default function must be default constructible");
@@ -142,18 +146,19 @@ public:
     }
 
     template<typename R = Return>
-    static auto default_function(Params ... ) noexcept -> std::enable_if_t<std::is_void_v<R>, void> {}
+    static auto default_function(Params ...) noexcept -> std::enable_if_t<std::is_void_v<R>, void>
+    {}
 };
 
 template<typename T>
-static const char* get_type_name()
+static const char *get_type_name()
 {
-    const char* result_name = typeid(T).name();
+    const char *result_name = typeid(T).name();
 #ifdef __GCC_COMPILER__
     // De-mangling uses GCC-specific functions.
     int error_code;
     char *demangled_name = abi::__cxa_demangle(result_name, NULL, NULL, &error_code);
-    if(!error_code)
+    if (!error_code)
         result_name = demangled_name;
 #endif
     return result_name;
@@ -178,15 +183,16 @@ using raw_type = std::remove_cvref_t<T>;
 
 template<typename T, typename U>
 using comparator = function<bool,
-    std::conditional_t<std::is_trivially_copyable_v<raw_type<T>>, raw_type<T>, raw_type<T> const &>,
-    std::conditional_t<std::is_trivially_copyable_v<raw_type<U>>, raw_type<U>, raw_type<U> const &>>;
+        std::conditional_t<std::is_trivially_copyable_v<raw_type<T>>, raw_type<T>, raw_type<T> const &>,
+        std::conditional_t<std::is_trivially_copyable_v<raw_type<U>>, raw_type<U>, raw_type<U> const &>>;
 
 template<typename T>
 using predicate = function<bool,
-    std::conditional_t<std::is_trivially_copyable_v<raw_type<T>>, raw_type<T>, raw_type<T> const &>>;
+        std::conditional_t<std::is_trivially_copyable_v<raw_type<T>>, raw_type<T>, raw_type<T> const &>>;
 
 template<typename Return, typename T = Return>
 using transform = function<Return,
-    std::conditional_t<std::is_trivially_copyable_v<raw_type<T>>, raw_type<T>, raw_type<T> const &>>;
+        std::conditional_t<std::is_trivially_copyable_v<raw_type<T>>, raw_type<T>, raw_type<T> const &>>;
+
 
 #endif // __FUNCTION_H__
