@@ -1,5 +1,5 @@
 # Functional types in C++.
-Implementation of wrapper objects for function pointers in C++.
+Implementation of wrapper objects for function pointers and functional programming utilities in C++.
 The `function<Return, Params ...>` class template provides an API for working with functions.
 The first template parameter is always required and represents the return type of the function.
 The following template parameters are all optional and represent the types of the arguments taken by the function.
@@ -8,4 +8,5 @@ Any `function` object that doesn't return `void` has its `operator()` automatica
 The `function` class template holds static functions used as default initializers. 
 Usage of the default constructor requires any non-void `Return` to be default constructible.
 
-The program requires at least C++20 due to the use of some specific `type_traits` members like `std::remove_cvref`.
+The `function_utils.h` header provides custom utility classes for manipulating callable objects, like `polymorphic_function` which combines multiple callables into one class and behaves like any of them depending on the context in which it is invoked. 
+The header also implements a `is_callable` type trait which tests if any type has at least one `operator()` definition.
