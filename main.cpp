@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include "function.h"
+#include "function_utils.h"
 
 long sum_them(int first, unsigned second, long third)
 {
@@ -33,7 +34,7 @@ int main()
     // partial_func will capture the first parameter as 10.
     auto partial_func = sum_func.partial(10);
     // Call the partial, providing the rest of the parameters.
-    std::cout << "sum_func(10, 20, 30) = " <<  partial_func(20u, 30L) << '\n' << '\n';
+    std::cout << "sum_func(10, 20, 30) = " << partial_func(20u, 30L) << '\n' << '\n';
 
     // We can also make functions that take other functions as parameters.
     function applier = apply<long, int, unsigned, long>;
@@ -44,11 +45,19 @@ int main()
 
     // Constructing an action from a lambda. Unfortunately, template type deduction does not work here.
     // We have to specify all template types explicitly.
-    action<std::string_view> print_message = [](std::string_view name){ std::cout << "Hello, " << name << "!\n";};
+    action<std::string_view> print_message = [](std::string_view name)
+    { std::cout << "Hello, " << name << "!\n"; };
     print_message("John");
 
     // Default constructing a comparator function.
     // The actual types of the function parameters are int and std::vector<int> const &.
     comparator<int const &, std::vector<int>> cmp;
     std::cout << "Type of comparator is: \t" << cmp.class_name << '\n';
+
+    // Combining multiple functions into one object.
+    auto combined_func = combine(sum_func, print_message);
+    std::cout << combined_func(1, 2, 3) << '\n';
+    auto extended = combined_func.extend([](double x, double y) { return x * y; });
+    std::cout << extended(2.3, 3.4) << '\n';
+    extended("Mike");
 }

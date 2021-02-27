@@ -20,13 +20,21 @@ public:
     polymorphic_function(T &&... callables) : Callables(std::forward<T>(callables)) ...
     {}
 
+    /**
+     * Extends the current polymorphic function with more callables.
+     *
+     * @tparam MoreCallables The types of the callable objects to be added to the overload set.
+     * @param callables The actual callable objects to be forwarded.
+     * @return A new polymorphic_function that combines new and old callables.
+     */
     template<typename ... MoreCallables>
-    auto extend(MoreCallables &&... callables)
+    [[nodiscard]] auto extend(MoreCallables &&... callables) const
     {
-        return polymorphic_function<polymorphic_function, std::decay_t<MoreCallables> ...>
+        using this_t = decltype(*this);
+        return polymorphic_function<std::decay_t<this_t>, std::decay_t<MoreCallables> ...>
                 {
-                std::forward<polymorphic_function>(*this),
-                std::forward<MoreCallables>(callables) ...
+                        std::forward<this_t>(*this),
+                        std::forward<MoreCallables>(callables) ...
                 };
     }
 };
@@ -39,7 +47,7 @@ public:
  * @return An instance of polymorphic_function.
  */
 template<typename ... Callables>
-auto combine(Callables &&... callables)
+[[nodiscard]] auto combine(Callables &&... callables)
 {
     return polymorphic_function<std::decay_t<Callables> ...>{std::forward<Callables>(callables) ...};
 }

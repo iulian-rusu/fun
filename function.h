@@ -105,7 +105,7 @@ public:
     template<typename ... PartialParams>
     [[nodiscard]] auto partial(PartialParams ... partial_params) const noexcept
     {
-        return [=](auto &&... rest_params)
+        return [...partial_params = std::move(partial_params), &fptr = *this](auto &&... rest_params)
         {
             return fptr(partial_params ..., rest_params ...);
         };
@@ -124,7 +124,7 @@ public:
     [[nodiscard]] auto composed_with(function<Params ..., CompositionParams ...> const &other_func) const noexcept
     {
         static_assert(sizeof ...(Params) == 1, "function with multiple parameters cannot be composed");
-        return [=](CompositionParams ... params)
+        return [&other_func = other_func, &fptr = *this](CompositionParams ... params)
         {
             return fptr(other_func(params ...));
         };
