@@ -57,8 +57,8 @@ int main()
     // Combining multiple functions into one object.
     auto combined_func = combine(sum_func, print_message);
     std::cout << combined_func(1, 2, 3) << '\n';
-    auto extended = combined_func.extend([](double x, double y){ return x * y; });
-    std::cout << extended(2.3, 3.4) << '\n';
+    auto extended = combined_func.extend(increment);
+    std::cout << extended(41) << '\n';
     extended("Mike");
 
     // Testing if types are callable.
