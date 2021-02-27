@@ -57,7 +57,12 @@ int main()
     // Combining multiple functions into one object.
     auto combined_func = combine(sum_func, print_message);
     std::cout << combined_func(1, 2, 3) << '\n';
-    auto extended = combined_func.extend([](double x, double y) { return x * y; });
+    auto extended = combined_func.extend([](double x, double y){ return x * y; });
     std::cout << extended(2.3, 3.4) << '\n';
     extended("Mike");
+
+    // Testing if types are callable.
+    std::cout << "Is a lambda callable? " << is_callable_v<decltype(extended)> << '\n';
+    std::cout << "Is a function pointer callable? " << is_callable_v<decltype(sum_them)> << '\n';
+    std::cout << "Is an int callable? " << is_callable_v<int> << '\n';
 }

@@ -1,7 +1,6 @@
 #ifndef __FUNCTION_UTILS_H__
 #define __FUNCTION_UTILS_H__
 
-#include <utility>
 
 /**
  * A class that behaves like any of the given callable objects at the same time.
@@ -51,6 +50,77 @@ template<typename ... Callables>
 {
     return polymorphic_function<std::decay_t<Callables> ...>{std::forward<Callables>(callables) ...};
 }
+
+
+/**
+ * Custom type traits to check if a type is callable.
+ * Adapted from https://stackoverflow.com/questions/15393938/find-out-whether-a-c-object-is-callable.
+ */
+
+template<typename T>
+using no_ref_t = std::remove_reference_t<T>;
+
+template<typename T>
+using no_ptr_ref_t = std::remove_pointer_t<no_ref_t<T>>;
+
+template<typename T>
+using is_function = std::is_function<no_ptr_ref_t<T>>;
+
+/**
+ * Implementation of the is_callable type trait. This general template will be used when T is a primitive.
+ * A primitive is callable when it's a function.
+ *
+ * @tparam is_class Boolean indicating whether T is a class or primitive type.
+ * @tparam T The type checked for being a callable.
+ */
+template<typename T, bool is_class>
+class is_callable_impl : public is_function<T>
+{
+};
+
+/**
+ * Partial specialization of is_callable_impl.
+ * Used when T is a class type or a reference to it.
+ *
+ * @tparam T The type checked for being a callable.
+ */
+template<typename T>
+class is_callable_impl<T, true>
+{
+    struct _fallback
+    {
+        void operator()()
+        {};
+    };
+
+    struct _T_and_fallback : T, _fallback
+    {
+    };
+
+    template<typename U, U>
+    struct _is_instance_of;
+
+    template<typename>
+    static std::true_type _check_operator(...)
+    {
+        return std::true_type{};
+    };
+
+    template<typename C>
+    static std::false_type _check_operator(_is_instance_of<void (_fallback::*)(), &C::operator()> *)
+    {
+        return std::false_type{};
+    };
+
+public:
+    using type = decltype(_check_operator<_T_and_fallback>(nullptr));
+};
+
+template<typename T>
+using is_callable_t = typename is_callable_impl<no_ref_t<T>, std::is_class_v<no_ref_t<T>>>::type;
+
+template<typename T>
+constexpr bool is_callable_v = std::is_same_v<std::true_type, is_callable_t<T>>;
 
 
 #endif // __FUNCTION_UTILS_H__
