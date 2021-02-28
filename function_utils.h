@@ -39,7 +39,7 @@ class _is_callable_impl<T, true>
         {};
     };
 
-    class _T_and_fallback : T, _fallback
+    class _T_and_fallback : public T, public _fallback
     {
     };
 
@@ -63,7 +63,7 @@ public:
 };
 
 template<typename T>
-using is_callable = _is_callable_impl<no_ref_t<T>, std::is_class_v<no_ref_t<T>>>;
+using is_callable = _is_callable_impl<std::decay_t<T>, std::is_class_v<std::decay_t<T>>>;
 
 template<typename T>
 using is_callable_t = typename is_callable<T>::type;

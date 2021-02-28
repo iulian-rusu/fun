@@ -19,6 +19,10 @@ int increment(int x)
     return x + 1;
 }
 
+class Test
+{
+};
+
 int main()
 {
     // OK, int has a default constructor, calling def_func will return 0.
@@ -52,7 +56,7 @@ int main()
     // Default constructing a comparator function.
     // The actual types of the function parameters are int and std::vector<int> const &.
     comparator<int const &, std::vector<int>> cmp;
-    std::cout << "Type of comparator is: \t" << cmp.class_name << '\n';
+    std::cout << "Type of comparator is: \t" << cmp.class_name << '\n' << '\n';
 
     // Combining multiple functions into one object.
     auto combined_func = combine(sum_func, print_message);
@@ -62,7 +66,16 @@ int main()
     extended("Mike");
 
     // Testing if types are callable.
-    std::cout << "Is a lambda callable? " << is_callable_v<decltype(extended)> << '\n';
-    std::cout << "Is a function pointer callable? " << is_callable_v<decltype(sum_them)> << '\n';
-    std::cout << "Is an int callable? " << is_callable_v<int> << '\n';
+    std::cout << "\nIs the type callable?\n";
+    std::cout << "functor:\t" << is_callable_v<decltype(extended)> << '\n';
+    std::cout << "functor &:\t" << is_callable_v<decltype(extended) &> << '\n';
+    std::cout << "functor *:\t" << is_callable_v<decltype(extended) *> << '\n';
+    std::cout << "function pointer:\t" << is_callable_v<decltype(sum_them)> << '\n';
+    std::cout << "float:\t" << is_callable_v<float> << '\n';
+    std::cout << "std::string &:\t" << is_callable_v<std::string &> << '\n';
+    std::cout << "std::string const &:\t" << is_callable_v<std::string const &> << '\n';
+    std::cout << "std::string &&:\t" << is_callable_v<std::string &&> << '\n';
+    std::cout << "std::string *:\t" << is_callable_v<std::string *> << '\n';
+
+
 }
