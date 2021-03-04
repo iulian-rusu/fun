@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
-#include "function.h"
-#include "function_utils.h"
+#include "functional.h"
 
 long sum_them(int first, unsigned second, long third)
 {
