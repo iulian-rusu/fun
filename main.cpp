@@ -22,8 +22,7 @@ class Test
 {
 };
 
-int main()
-{
+int main(){
     // OK, int has a default constructor, calling def_func will return 0.
     function<int> def_func;
     std::cout << "Type of def_func is:\t\t\t\t" << def_func.class_name << '\n';
@@ -66,15 +65,15 @@ int main()
 
     // Testing if types are callable.
     std::cout << "\nIs the type callable?\n";
-    std::cout << "functor:\t" << is_callable_v<decltype(extended)> << '\n';
-    std::cout << "functor &:\t" << is_callable_v<decltype(extended) &> << '\n';
-    std::cout << "functor *:\t" << is_callable_v<decltype(extended) *> << '\n';
+    std::cout << "lambda:\t" << is_callable_v<decltype(extended)> << '\n';
+    std::cout << "reference to lambda:\t" << is_callable_v<decltype(extended) &> << '\n';
+    std::cout << "pointer to lambda:\t" << is_callable_v<decltype(extended) *> << '\n';
     std::cout << "function pointer:\t" << is_callable_v<decltype(sum_them)> << '\n';
     std::cout << "float:\t" << is_callable_v<float> << '\n';
     std::cout << "std::string &:\t" << is_callable_v<std::string &> << '\n';
     std::cout << "std::string const &:\t" << is_callable_v<std::string const &> << '\n';
     std::cout << "std::string &&:\t" << is_callable_v<std::string &&> << '\n';
-    std::cout << "std::string *:\t" << is_callable_v<std::string *> << '\n';
+    std::cout << "predicate<int>:\t" << is_callable_v<predicate<int>> << '\n';
 
 
 }
