@@ -121,7 +121,8 @@ public:
      * @return A lambda that represents the composition.
      */
     template<typename ... CompositionParams>
-    [[nodiscard]] constexpr auto composed_with(function<Params ..., CompositionParams ...> const &other_func) const noexcept
+    [[nodiscard]] constexpr auto
+    composed_with(function<Params ..., CompositionParams ...> const &other_func) const noexcept
     {
         static_assert(sizeof ...(Params) == 1, "function with multiple parameters cannot be composed");
         return [&other_func = other_func, &fptr = *this](CompositionParams ... params)
@@ -319,7 +320,7 @@ public:
     template<typename ... MoreCallables>
     [[nodiscard]] constexpr auto extend(MoreCallables &&... callables) const
     {
-        return _extend_impl(class_t<MoreCallables>(callables) ...);
+        return _extend_impl(std::forward<class_t<MoreCallables>>(class_t<MoreCallables>(callables))...);
     }
 
 private:
@@ -345,7 +346,7 @@ private:
 template<typename ... Callables>
 [[nodiscard]] constexpr auto combine(Callables &&... callables)
 {
-    return _combine_impl(class_t<Callables>(callables) ...);
+    return _combine_impl(std::forward<class_t<Callables>>(class_t<Callables>(callables)) ...);
 }
 
 template<typename ... Callables>
