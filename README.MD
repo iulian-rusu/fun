@@ -8,5 +8,4 @@ Any `function` object that doesn't return `void` has its `operator()` automatica
 The `function` class template holds static functions used as default initializers. 
 Usage of the default constructor requires any non-void `Return` to be default constructible.
 
-The `function_utils.h` header provides custom utility classes for manipulating callable objects, like `polymorphic_function` which combines multiple callables into one class and behaves like any of them depending on the context in which it is invoked. 
 The header also implements a `is_callable` type trait which tests if any type has at least one `operator()` definition.
