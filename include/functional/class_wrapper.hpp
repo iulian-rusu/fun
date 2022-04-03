@@ -1,5 +1,5 @@
-#ifndef FUNCTIONAL_FUNCTION_CLASS_WRAPPER_HPP
-#define FUNCTIONAL_FUNCTION_CLASS_WRAPPER_HPP
+#ifndef FUNCTIONAL_CLASS_WRAPPER_HPP
+#define FUNCTIONAL_CLASS_WRAPPER_HPP
 
 #include<functional/function.hpp>
 
@@ -30,4 +30,4 @@ template<typename T>
 using class_wrapper_t = typename class_wrapper<std::decay_t<T>>::type;
 
 
-#endif //FUNCTIONAL_FUNCTION_CLASS_WRAPPER_HPP
+#endif //FUNCTIONAL_CLASS_WRAPPER_HPP

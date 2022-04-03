@@ -1,7 +1,7 @@
-#ifndef FUNCTIONAL_OVERLOADED_HPP
-#define FUNCTIONAL_OVERLOADED_HPP
+#ifndef FUNCTIONAL_OVERLOAD_HPP
+#define FUNCTIONAL_OVERLOAD_HPP
 
-#include <functional/function_class_wrapper.hpp>
+#include <functional/class_wrapper.hpp>
 
 /**
  * A class that behaves like any of the given callable objects at the same time.
@@ -17,7 +17,7 @@ struct overloaded : Callables ...
 
     template<typename... T>
     constexpr overloaded(T &&... callables)
-    noexcept((std::is_nothrow_move_constructible_v<Callables> && ...))
+    noexcept((std::is_nothrow_move_constructible_v<Callables> &&...))
         : Callables(std::forward<T>(callables)) ...
     {}
 
@@ -70,4 +70,4 @@ template<typename... Callables>
     return detail::overload_impl(class_wrapper_t<Callables>(std::forward<Callables>(callables)) ...);
 }
 
-#endif //FUNCTIONAL_OVERLOADED_HPP
+#endif //FUNCTIONAL_OVERLOAD_HPP

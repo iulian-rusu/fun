@@ -1,7 +1,5 @@
 #include <iostream>
-#include <vector>
 #include <functional.hpp>
-#include <functional/function.hpp>
 
 long sum_three_nums(int first, unsigned second, long third)
 {
@@ -30,5 +28,9 @@ int main(){
     std::cout << overloaded_func(1, 2, 3) << '\n';
     auto extended = overloaded_func.extend(increment);
     std::cout << extended(41) << '\n';
-    extended("Mike");
+    extended("World");
+
+    // Adapting a function to be curried
+    auto curried_sum = curry(sum_three_nums);
+    std::cout << curried_sum(10)(20)(30) << '\n';
 }
