@@ -67,7 +67,7 @@ public:
      * @param   args Pack of arguments used to call the function.
      * @return  A value of type Return, the result of the function call.
      */
-    [[nodiscard]] auto operator()(Args ... args) const
+    [[nodiscard]] constexpr auto operator()(Args ... args) const
     requires (!std::is_void_v<Return>)
     {
         return fptr(args ...);
@@ -79,7 +79,7 @@ public:
     * @param    args Pack of arguments used to call the function.
     * @return   A value of type Return, the result of the function call.
     */
-    auto operator()(Args ... args) const
+    constexpr auto operator()(Args ... args) const
     requires std::is_void_v<Return>
     {
         fptr(args ...);

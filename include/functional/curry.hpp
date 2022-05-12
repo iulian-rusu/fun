@@ -32,7 +32,7 @@ inline constexpr bool is_nothrow_if_invocable_v = is_nothrow_if_invocable<F, Arg
  * @return      A lambda expression which behaves as a curried version of the original callable.
  */
 template<typename F, typename... Args>
-decltype(auto) curry(F &&f, Args &&... args) noexcept(is_nothrow_if_invocable_v<F, Args ...>)
+constexpr decltype(auto) curry(F &&f, Args &&... args) noexcept(is_nothrow_if_invocable_v<F, Args ...>)
 {
     using nothrow_t = is_nothrow_if_invocable<F, Args ...>;
 
