@@ -36,11 +36,11 @@ decltype(auto) curry(F &&f, Args &&... args) noexcept(is_nothrow_if_invocable_v<
 {
     using nothrow_t = is_nothrow_if_invocable<F, Args ...>;
 
-    if constexpr(requires { std::invoke(f, std::forward<Args>(args) ...); })
+    if constexpr (requires { std::invoke(f, std::forward<Args>(args) ...); })
         return std::invoke(f, std::forward<Args>(args) ...);
     else
-        return [&f, ...args = std::forward<Args>(args)](auto... xs) noexcept(nothrow_t{}) {
-            return curry(f, args ..., xs ...);
+        return [&f, ...args = std::forward<Args>(args)](auto &&... xs) mutable noexcept(nothrow_t{}) {
+            return curry(f, std::forward<Args>(args) ..., std::forward<decltype(xs)>(xs) ...);
         };
 }
 

@@ -15,12 +15,6 @@ struct overloaded : Callables ...
 {
     using Callables::operator() ...;
 
-    template<typename... T>
-    constexpr overloaded(T &&... callables)
-    noexcept((std::is_nothrow_move_constructible_v<Callables> &&...))
-        : Callables(std::forward<T>(callables)) ...
-    {}
-
     /**
      * Extends the current overloaded functor with more callables.
      *
@@ -47,6 +41,9 @@ private:
         };
     }
 };
+
+template<typename... Callables>
+overloaded(Callables &&...) -> overloaded<class_wrapper_t<Callables> ...>;
 
 namespace detail
 {

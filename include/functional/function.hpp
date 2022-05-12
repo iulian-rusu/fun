@@ -161,12 +161,12 @@ template<typename... Args>
 using action = function<void, Args ...>;
 
 template<typename T, typename U>
-using comparator = function<bool, argument_t<T>, argument_t<U>>;
+using comparator = function<bool, arg_t<T>, arg_t<U>>;
 
 template<typename T>
-using predicate = function<bool, argument_t<T>>;
+using predicate = function<bool, arg_t<T>>;
 
 template<typename Return, typename T = Return>
-using transform = function<Return, argument_t<T>>;
+using transform = function<Return, arg_t<T>>;
 
 #endif //FUNCTIONAL_FUNCTION_HPP

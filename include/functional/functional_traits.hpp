@@ -4,15 +4,15 @@
 #include <type_traits>
 
 /*
- * The type trait uses value semantics for trivially copyable types and const references otherwise.
+ * Type trait for using value semantics for trivially copyable types and const references otherwise.
  */
 template<typename T>
-using argument_t =
+using arg_t =
         std::conditional_t
         <
-                std::is_trivially_copyable_v<std::remove_cvref_t<T>>,
-                std::remove_cvref_t<T>,
-                std::remove_cvref_t<T> const &
+            std::is_trivially_copyable_v<std::remove_cvref_t<T>>,
+            std::remove_cvref_t<T>,
+            std::remove_cvref_t<T> const &
         >;
 
 /**
@@ -32,7 +32,7 @@ namespace detail
  * @tparam  is_class Boolean indicating whether T is a class or primitive type.
  * @tparam  T The type checked for being a callable.
  */
-    template<typename T, bool is_class>
+    template<typename T, bool is_class = std::is_class_v<T>>
     struct is_callable_impl : is_function<T> {};
 
     template<typename T>
@@ -61,16 +61,14 @@ namespace detail
         }
 
         using type = decltype(check<combined>(nullptr));
+        static constexpr bool value = type{};
     };
 }
 
 template<typename T>
-using is_callable = detail::is_callable_impl<std::decay_t<T>, std::is_class_v<std::decay_t<T>>>;
+using is_callable = detail::is_callable_impl<std::decay_t<T>>;
 
 template<typename T>
-using is_callable_t = typename is_callable<T>::type;
-
-template<typename T>
-constexpr bool is_callable_v = std::is_same_v<std::true_type, is_callable_t<T>>;
+constexpr bool is_callable_v = is_callable<T>::value;
 
 #endif //FUNCTIONAL_FUNCTIONAL_TRAITS_HPP
