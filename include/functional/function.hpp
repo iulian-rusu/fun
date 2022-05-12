@@ -1,7 +1,7 @@
 #ifndef FUNCTIONAL_FUNCTION_HPP
 #define FUNCTIONAL_FUNCTION_HPP
 
-/* Define special symbol for GCC compilers. */
+// Define special symbol for GCC compilers
 #if (defined(__GNUC__) || defined(__GNUG__)) && !defined(__clang__)
 #define FUNCTIONAL_GCC
 #endif
@@ -9,7 +9,7 @@
 #include <string>
 #include <functional/functional_traits.hpp>
 
-/* Include GCC-specific name de-mangling header. */
+// Include GCC-specific name de-mangling header
 #ifdef FUNCTIONAL_GCC
 #include <cxxabi.h>
 #endif
@@ -17,8 +17,8 @@
 /**
  * Template for wrapper over a function pointer.
  *
- * @tparam  Return The return type of the function.
- * @tparam  Args The optional parameter types taken by the function.
+ * @tparam  Return The return type of the function
+ * @tparam  Args The optional parameter types taken by the function
  */
 template<typename Return, typename... Args>
 class function
@@ -64,8 +64,8 @@ public:
     /**
      * This overload is [[nodiscard]] and is enabled if Return is not void.
      *
-     * @param   args Pack of arguments used to call the function.
-     * @return  A value of type Return, the result of the function call.
+     * @param   args Pack of arguments used to call the function
+     * @return  A value of type Return, the result of the function call
      */
     [[nodiscard]] constexpr auto operator()(Args ... args) const
     requires (!std::is_void_v<Return>)
@@ -76,8 +76,8 @@ public:
     /**
     * This overload's return type is void and can be discarded.
     *
-    * @param    args Pack of arguments used to call the function.
-    * @return   A value of type Return, the result of the function call.
+    * @param    args Pack of arguments used to call the function
+    * @return   A value of type Return, the result of the function call
     */
     constexpr auto operator()(Args ... args) const
     requires std::is_void_v<Return>
@@ -88,9 +88,9 @@ public:
     /**
      * Returns a lambda that captures a partial state of the original function.
      *
-     * @tparam  FrontArgs The types used in the partial state.
-     * @param   front_args The actual arguments used to make the partial function.
-     * @return  A lambda capturing the partial state of the function.
+     * @tparam  FrontArgs The types used in the partial state
+     * @param   front_args The actual arguments used to make the partial function
+     * @return  A lambda capturing the partial state of the function
      */
     template<typename... FrontArgs>
     [[nodiscard]] constexpr auto bind_front(FrontArgs &&... front_args) const noexcept
@@ -105,9 +105,9 @@ public:
      * Returns a lambda that captures the functional composition of this object and the received object.
      * f.composed_with(g)(x) <=> (f o g)(x) <=> f(g(x))
      *
-     * @tparam  ResultArgs The arguments received by the composition result.
-     * @param   other_func A constant reference to the composition target.
-     * @return  A lambda that represents the composition.
+     * @tparam  ResultArgs The arguments received by the composition result
+     * @param   other_func A constant reference to the composition target
+     * @return  A lambda that represents the composition
      */
     template<typename... ResultArgs>
     requires (sizeof... (Args) == 1)
@@ -122,7 +122,7 @@ public:
     /**
      * Default static member function used to default construct a function object.
      *
-     * @return  A default constructed Return type object.
+     * @return  A default constructed Return type object
      */
     static constexpr Return default_function(Args ...)
     requires (std::is_default_constructible_v<Return>)

@@ -5,15 +5,7 @@
 
 namespace detail
 {
-    /**
-     * Defines a wrapper type for non-class callables.
-     * Class types are left unchanged.
-     *
-     * @tparam  T The callable type to be wrapped if necessary.
-     * @tparam  is_class Flag to test if T is a class type.
-     * @tparam  is_callable Flag to test if T can be assigned to a function object.
-     */
-    template<typename T, bool is_class = std::is_class_v<T>, bool is_callable = is_callable_v<T>>
+    template<typename T, bool IsClass = std::is_class_v<T>, bool IsCallable = is_callable_v<T>>
     struct class_wrapper_impl
     {
         using type = T;
@@ -22,18 +14,23 @@ namespace detail
     template<typename T>
     struct class_wrapper_impl<T, false, true>
     {
-        using type = decltype(function(std::declval<T>()));
+        using type = std::remove_reference_t<decltype(function{std::declval<T>()})>;
     };
 
     template<typename T>
     struct class_wrapper_impl<T, false, false> {};
 }
 
+/**
+ * Defines a wrapper type for non-class callables.
+ * Class types are left unchanged.
+ *
+ * @tparam T The callable type to be wrapped if necessary
+ */
 template<typename T>
 using class_wrapper = detail::class_wrapper_impl<std::decay_t<T>>;
 
 template<typename T>
 using class_wrapper_t = typename class_wrapper<T>::type;
-
 
 #endif //FUNCTIONAL_CLASS_WRAPPER_HPP

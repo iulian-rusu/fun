@@ -23,16 +23,7 @@ using is_function = std::is_function<std::remove_pointer_t<std::remove_reference
 
 namespace detail
 {
-/**
- * Custom type trait to check if a type is callable.
- * Adapted from https://stackoverflow.com/questions/15393938/find-out-whether-a-c-object-is-callable.
- * This general template will be used when T is a primitive.
- * A primitive is callable when it's a function (function pointer).
- *
- * @tparam  is_class Boolean indicating whether T is a class or primitive type.
- * @tparam  T The type checked for being a callable.
- */
-    template<typename T, bool is_class = std::is_class_v<T>>
+    template<typename T, bool IsClass = std::is_class_v<T>>
     struct is_callable_impl : is_function<T> {};
 
     template<typename T>
@@ -65,6 +56,12 @@ namespace detail
     };
 }
 
+/**
+ * Custom type trait to check if a type is callable.
+ * Adapted from https://stackoverflow.com/questions/15393938/find-out-whether-a-c-object-is-callable.
+ *
+ * @tparam  T The type checked for being a callable
+ */
 template<typename T>
 using is_callable = detail::is_callable_impl<std::decay_t<T>>;
 

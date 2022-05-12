@@ -8,7 +8,7 @@
  * All callable objects must have a different signature for their operator().
  * The result of calling operator() is determined using operator overloading rules.
  *
- * @tparam  Callables The types of the callable objects that determine this function's behaviour.
+ * @tparam  Callables The types of the callable objects that determine this function's behaviour
  */
 template<typename... Callables>
 struct overloaded : Callables ...
@@ -18,9 +18,9 @@ struct overloaded : Callables ...
     /**
      * Extends the current overloaded functor with more callables.
      *
-     * @tparam  MoreCallables The types of the callable objects to be added to the overload set.
-     * @param   callables The actual callable objects to be forwarded.
-     * @return  A new overloaded object that combines new and old callables.
+     * @tparam  MoreCallables The types of the callable objects to be added to the overload set
+     * @param   callables The actual callable objects to be forwarded
+     * @return  A new overloaded object that combines new and old callables
      */
     template<typename... MoreCallables>
     [[nodiscard]] constexpr auto extend(MoreCallables &&... callables) const
@@ -57,14 +57,13 @@ namespace detail
 /**
  * Creates an overloaded object that contains all the given function signatures at once.
  *
- * @tparam  Callables The types of the callable objects that will be combined into one class.
- * @param   callables The callable objects.
- * @return  An instance of overloaded.
+ * @tparam  Callables The types of the callable objects that will be combined into one class
+ * @param   callables The callable objects
+ * @return  An instance of overloaded
  */
 template<typename... Callables>
 [[nodiscard]] constexpr auto overload(Callables &&... callables)
 {
     return detail::overload_impl(class_wrapper_t<Callables>(std::forward<Callables>(callables)) ...);
 }
-
 #endif //FUNCTIONAL_OVERLOAD_HPP
