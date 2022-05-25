@@ -11,8 +11,9 @@ int increment(int x)
     return x + 1;
 }
 
-int main(){
-    // OK, int has a default constructor, calling def_func will return 0
+int main()
+{
+    // OK, int has a default constructor, calling default_func will return 0
     function<int> default_func;
     std::cout << "default_func() = " << default_func() << '\n';
 
@@ -22,9 +23,10 @@ int main(){
     std::cout << "sum_func(10, 20, 30) = " << partial_func(20u, 30L) << '\n';
 
     // Overloading multiple functions into one object
-    auto overloaded_func = overload(sum_three_nums, [](std::string_view name) {
-        std::cout << "Hello, " << name << '\n';
-    });
+    auto overloaded_func = overload(
+            [](std::string_view name) { std::cout << "Hello, " << name << '\n'; },
+            sum_three_nums
+    );
     std::cout << overloaded_func(1, 2, 3) << '\n';
     auto extended = overloaded_func.extend(increment);
     std::cout << extended(41) << '\n';

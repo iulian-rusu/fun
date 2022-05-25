@@ -14,6 +14,20 @@
 #include <cxxabi.h>
 #endif
 
+
+/**
+ * Function used to default construct an object.
+ *
+ * @return  A default constructed Return type object
+ */
+template<typename Return, typename... Args>
+static constexpr Return default_function(Args ...)
+requires (std::is_void_v<Return> || std::is_default_constructible_v<Return>)
+{
+    if constexpr (!std::is_void_v<Return>)
+        return {};
+}
+
 /**
  * Template for wrapper over a function pointer.
  *
@@ -29,15 +43,15 @@ public:
     static std::string_view const fptr_name;
     static std::string_view const class_name;
 
-    constexpr function() noexcept: fptr(function::default_function) {}
+    constexpr function() noexcept: fptr{default_function<Return, Args ...>} {}
 
     constexpr function(function<Return, Args ...> const &other) noexcept = default;
 
-    constexpr function(Return (*func)(Args ...)) noexcept: fptr(func) {}
+    constexpr function(Return (*func)(Args ...)) noexcept: fptr{func} {}
 
     template<typename Lambda>
     requires std::is_convertible_v<std::remove_cvref<Lambda>, decltype(fptr)>
-    constexpr function(Lambda &&lambda) noexcept : fptr(std::forward<Lambda>(lambda)) {}
+    constexpr function(Lambda &&lambda) noexcept : fptr{std::forward<Lambda>(lambda)} {}
 
     constexpr function &operator=(Return (*func)(Args ...)) noexcept
     {
@@ -118,21 +132,6 @@ public:
             return fptr(other_func(args ...));
         };
     }
-
-    /**
-     * Default static member function used to default construct a function object.
-     *
-     * @return  A default constructed Return type object
-     */
-    static constexpr Return default_function(Args ...)
-    requires (std::is_default_constructible_v<Return>)
-    {
-        return {};
-    }
-
-    static constexpr void default_function(Args ...) noexcept
-    requires std::is_void_v<Return>
-    {}
 };
 
 template<typename T>
