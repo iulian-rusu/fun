@@ -25,9 +25,9 @@ namespace fun
                 return std::invoke(std::forward<F>(f), std::forward<Args>(args) ...);
             else
                 return [captures = std::make_tuple(std::forward<F>(f), std::forward<Args>(args) ...)]
-                    <typename... Xs>(Xs &&... xs) mutable noexcept {
+                    <typename... Xs>(Xs &&... xs) mutable noexcept -> decltype(auto) {
                         return std::apply(
-                            [&]<typename... Ts>(Ts &&... ts) {
+                            [&]<typename... Ts>(Ts &&... ts) noexcept -> decltype(auto) {
                                 return curry_impl(std::forward<Ts>(ts) ..., std::forward<Xs>(xs) ...);
                             },
                             captures
