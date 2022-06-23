@@ -27,8 +27,14 @@ std::cout << type_name(3.14) << '\n'; // "double"
 ## Currying
 Currying is the technique of converting a function that takes multiple arguments into a sequence of functions that each takes a single argument.
 Using the `curry` function, a callable object can be adapted to
-receive its arguments one-by-one.
+receive its arguments one-by-one.  This operation can be undone with the
+`uncurry` function.
+
 ```cpp
-auto curried = fun::curry([](int x, int y, int z) { return x + y + z; });
-std::cout << curried(1)(2)(3); // 6
+auto original = [](int x, int y, int z) { return x + y + z; };
+auto curried = fun::curry(original);
+auto uncurried = fun::uncurry(curried);
+std::cout << original(1, 2, 3) << '\n';  // 6
+std::cout << curried(1)(2)(3) << '\n';   // 6
+std::cout << uncurried(1, 2, 3) << '\n'; // 6
 ```
