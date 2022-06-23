@@ -24,7 +24,7 @@ namespace fun
             if constexpr (requires { std::invoke(std::forward<F>(f), std::forward<Args>(args) ...); })
                 return std::invoke(std::forward<F>(f), std::forward<Args>(args) ...);
             else
-                return [captured = std::make_tuple(std::forward<F>(f), std::forward<Args>(args) ...)]
+                return [captured = std::tuple<F, Args ...>{std::forward<F>(f), std::forward<Args>(args) ...}]
                     <typename Arg>(Arg &&arg) noexcept -> decltype(auto) {
                         return std::apply(
                             [&]<typename... Ts>(Ts &&... ts) noexcept -> decltype(auto) {
@@ -87,7 +87,7 @@ namespace fun
         if constexpr (requires { std::invoke(std::forward<F>(f)); })
             return std::forward<F>(f);
         else
-            return [captured = std::make_tuple(std::forward<F>(f))]
+            return [captured = std::tuple<F>{std::forward<F>(f)}]
                 <typename Arg, typename... Args>(Arg &&arg, Args &&... args)
                 noexcept(std::is_nothrow_invocable_v<F, Arg &&>) -> decltype(auto) {
                     return detail::uncurry_impl(

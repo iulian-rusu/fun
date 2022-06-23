@@ -12,7 +12,7 @@ namespace fun
         template<typename F, std::size_t... Indices>
         constexpr decltype(auto) with_arity_impl(F &&f, std::index_sequence<Indices ...> &&) noexcept
         {
-            return [captured = std::make_tuple(std::forward<F>(f))]
+            return [captured = std::tuple<F>{std::forward<F>(f)}]
                 <typename... Args>(map_index_t<Indices, Args> &&... args)
                 noexcept(std::is_nothrow_invocable_v<F, Args &&...>) -> decltype(auto) {
                         return std::invoke(std::get<0>(captured), std::forward<Args>(args) ...);

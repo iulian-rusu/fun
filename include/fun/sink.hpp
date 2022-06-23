@@ -12,10 +12,10 @@ namespace fun
         template<typename F, std::size_t... Indices>
         constexpr decltype(auto) sink_impl(F &&f, std::index_sequence<Indices ...> &&) noexcept
         {
-            return [captured = std::make_tuple(std::forward<F>(f))](map_index_t<Indices, any>...)
-                    noexcept(std::is_nothrow_invocable_v<F>) -> decltype(auto) {
-                return std::invoke(std::get<0>(captured));
-            };
+            return [captured = std::tuple<F>{std::forward<F>(f)}]
+                (map_index_t<Indices, any>...) noexcept(std::is_nothrow_invocable_v<F>) -> decltype(auto) {
+                    return std::invoke(std::get<0>(captured));
+                };
         }
     }
 
