@@ -24,13 +24,13 @@ namespace fun
             if constexpr (requires { std::invoke(std::forward<F>(f), std::forward<Args>(args) ...); })
                 return std::invoke(std::forward<F>(f), std::forward<Args>(args) ...);
             else
-                return [captures = std::make_tuple(std::forward<F>(f), std::forward<Args>(args) ...)]
-                    <typename Arg>(Arg &&arg) mutable noexcept -> decltype(auto) {
+                return [captured = std::make_tuple(std::forward<F>(f), std::forward<Args>(args) ...)]
+                    <typename Arg>(Arg &&arg) noexcept -> decltype(auto) {
                         return std::apply(
                             [&]<typename... Ts>(Ts &&... ts) noexcept -> decltype(auto) {
                                 return curry_impl(std::forward<Ts>(ts) ..., std::forward<Arg>(arg));
                             },
-                            std::move(captures)
+                            std::move(captured)
                         );
                     };
         }
@@ -39,12 +39,17 @@ namespace fun
         constexpr decltype(auto) uncurry_impl(F &&f, Arg &&arg, Args &&... args) noexcept(is_nothrow_if_invocable_v<F &&, Arg &&>)
         {
             if constexpr (sizeof... (Args) == 0)
+            {
+                static_assert(!is_callable_v<std::invoke_result_t<F &&, Arg &&>>, "not enough parameters");
                 return std::invoke(std::forward<F>(f), std::forward<Arg>(arg));
+            }
             else
+            {
                 return uncurry_impl(
                     std::invoke(std::forward<F>(f), std::forward<Arg>(arg)),
                     std::forward<Args>(args) ...
                 );
+            }
         }
     }
 
@@ -69,8 +74,8 @@ namespace fun
 
     /**
      * Receives a curried calalble object and returns a lambda expression which allows passing
-     * multiple parameters at once to the initial curried function. Should only be called on
-     * curried functors.
+     * multiple parameters at once to the initial curried function.
+     * Must only be called on curried functors.
      *
      * @tparam F    The type of the curried callable
      * @param f     The curried callable
@@ -79,14 +84,14 @@ namespace fun
     template<typename F>
     [[nodiscard]] constexpr decltype(auto) uncurry(F &&f) noexcept
     {
-        if constexpr (requires{ std::invoke(std::forward<F>(f)); })
+        if constexpr (requires { std::invoke(std::forward<F>(f)); })
             return std::forward<F>(f);
         else
             return [captured = std::make_tuple(std::forward<F>(f))]
                 <typename Arg, typename... Args>(Arg &&arg, Args &&... args)
-                mutable noexcept(std::is_nothrow_invocable_v<F &&, Arg &&>) -> decltype(auto) {
+                noexcept(std::is_nothrow_invocable_v<F, Arg &&>) -> decltype(auto) {
                     return detail::uncurry_impl(
-                        std::invoke(std::forward<F>(std::get<0>(captured)), std::forward<Arg>(arg)),
+                        std::invoke(std::get<0>(captured), std::forward<Arg>(arg)),
                         std::forward<Args>(args) ...
                     );
                 };

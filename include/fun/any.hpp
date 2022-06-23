@@ -6,27 +6,26 @@
 namespace fun
 {
     /**
-     * Type that can be used in an unevaluated context as a placeholder for anything.
+     * Type that can be used as a placeholder for anything.
      * It is constructible and asignable from anything, as well as implicitly convertible to any type.
      */
     struct any
     {
         template<typename... T>
-        constexpr any(T &&...) noexcept;
+        constexpr explicit(false) any(T &&...) noexcept {}
 
         template<typename T>
-        constexpr any &operator=(T &&) noexcept;
+        constexpr any &operator=(T &&) noexcept { return *this; }
 
+        template<typename T>
+        constexpr auto operator<=>(T const &) const noexcept { return std::strong_ordering::equal; }
+
+        template<typename T>
+        constexpr bool operator==(T const &) const noexcept { return true; }
+
+        // Requires unevaluated context
         template<typename T>
         constexpr explicit(false) operator T() const noexcept;
     };
-
-    // Utility functions used to get rvalues or lvalues of any type
-    template<typename T> constexpr auto rvalue() noexcept -> decltype(std::declval<T>());
-    template<typename T> constexpr auto lvalue() noexcept -> decltype(std::declval<T &>());
-
-    // Template to allow expansion with std::index_sequence
-    template<auto = 0> constexpr auto rvalue() noexcept -> decltype(std::declval<any>());
-    template<auto = 0> constexpr auto lvalue() noexcept -> decltype(std::declval<any &>());
 }
 #endif //FUN_ANY_HPP

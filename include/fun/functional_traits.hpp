@@ -1,24 +1,12 @@
-#ifndef FUN_FUNCTION_TRAITS_HPP
-#define FUN_FUNCTION_TRAITS_HPP
+#ifndef FUN_FUNCTIONAL_TRAITS_HPP
+#define FUN_FUNCTIONAL_TRAITS_HPP
 
 #include <type_traits>
 #include <functional>
-#include <fun/any.hpp>
+#include <fun/utility.hpp>
 
 namespace fun
 {
-    /*
-     * Type trait for using value semantics for trivially copyable types and const references otherwise.
-     */
-    template<typename T>
-    using arg_t =
-            std::conditional_t
-            <
-                std::is_trivially_copyable_v<std::remove_cvref_t<T>>,
-                std::remove_cvref_t<T>,
-                std::remove_cvref_t<T> const &
-            >;
-
     /**
      * std::is_function<T> is not std::true_type when T is a reference or pointer to a function
      */
@@ -101,4 +89,4 @@ namespace fun
     template<typename F, std::size_t N>
     concept invocable_with_arity = detail::is_invocable_with_arity_impl<F, std::make_index_sequence<N>>::value;
 }
-#endif //FUN_FUNCTION_TRAITS_HPP
+#endif //FUN_FUNCTIONAL_TRAITS_HPP

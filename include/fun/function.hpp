@@ -7,7 +7,7 @@
 #endif
 
 #include <string>
-#include <fun/function_traits.hpp>
+#include <fun/functional_traits.hpp>
 
 // Include GCC-specific name de-mangling header
 #ifdef FUN_GCC
