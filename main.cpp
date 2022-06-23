@@ -17,5 +17,10 @@ int main()
     std::cout << type_name("abc") << '\n';
     std::cout << type_name(Foo{}) << '\n';
     std::cout << type_name(std::string_view{}) << '\n';
+
+    auto original = [](int x, int y, int z) { return x + y + z; };
+    auto curried = fun::curry(original);
+    auto uncurried = fun::uncurry(curried);
+    std::cout << original(11, 22, 33) << ' ' << curried(11)(22)(33) << ' ' << uncurried(11, 22, 33);
 }
 

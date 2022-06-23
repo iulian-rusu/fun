@@ -1,11 +1,11 @@
-#ifndef FUNCTIONAL_CLASS_WRAPPER_HPP
-#define FUNCTIONAL_CLASS_WRAPPER_HPP
+#ifndef FUN_CLASS_WRAPPER_HPP
+#define FUN_CLASS_WRAPPER_HPP
 
 #include<fun/function.hpp>
 
 namespace fun
 {
-    namespace
+    namespace detail
     {
         template<typename T, bool IsClass = std::is_class_v<T>, bool IsCallable = is_callable_v<T>>
         struct class_wrapper_impl
@@ -30,9 +30,9 @@ namespace fun
      * @tparam T The callable type to be wrapped if necessary
      */
     template<typename T>
-    using class_wrapper = class_wrapper_impl<std::decay_t<T>>;
+    using class_wrapper = detail::class_wrapper_impl<std::decay_t<T>>;
 
     template<typename T>
     using class_wrapper_t = typename class_wrapper<T>::type;
 }
-#endif //FUNCTIONAL_CLASS_WRAPPER_HPP
+#endif //FUN_CLASS_WRAPPER_HPP

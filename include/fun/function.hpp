@@ -1,16 +1,16 @@
-#ifndef FUNCTIONAL_FUNCTION_HPP
-#define FUNCTIONAL_FUNCTION_HPP
+#ifndef FUN_FUNCTION_HPP
+#define FUN_FUNCTION_HPP
 
 // Define special symbol for GCC compilers
 #if (defined(__GNUC__) || defined(__GNUG__)) && !defined(__clang__)
-#define FUNCTIONAL_GCC
+#define FUN_GCC
 #endif
 
 #include <string>
 #include <fun/function_traits.hpp>
 
 // Include GCC-specific name de-mangling header
-#ifdef FUNCTIONAL_GCC
+#ifdef FUN_GCC
 #include <cxxabi.h>
 #endif
 
@@ -139,7 +139,7 @@ namespace fun
     static auto *get_type_name()
     {
         char const *result_name = typeid(T).name();
-#ifdef FUNCTIONAL_GCC
+#ifdef FUN_GCC
         // De-mangling uses GCC-specific functions.
     int error_code{};
     char *demangled_name = abi::__cxa_demangle(result_name, nullptr, nullptr, &error_code);
@@ -155,8 +155,6 @@ namespace fun
     template<typename Return, typename... Args>
     std::string_view const function<Return, Args ...>::class_name = get_type_name<function>();
 
-    // Some utility typedefs
-
     template<typename... Args>
     using action = function<void, Args ...>;
 
@@ -168,6 +166,5 @@ namespace fun
 
     template<typename Return, typename T = Return>
     using transform = function<Return, arg_t<T>>;
-
 }
-#endif //FUNCTIONAL_FUNCTION_HPP
+#endif //FUN_FUNCTION_HPP

@@ -1,5 +1,5 @@
-#ifndef FUNCTIONAL_OVERLOAD_HPP
-#define FUNCTIONAL_OVERLOAD_HPP
+#ifndef FUN_OVERLOAD_HPP
+#define FUN_OVERLOAD_HPP
 
 #include <fun/class_wrapper.hpp>
 
@@ -46,7 +46,7 @@ namespace fun
     template<typename... Callables>
     overload_set(Callables &&...) -> overload_set<class_wrapper_t<Callables> ...>;
 
-    namespace
+    namespace detail
     {
         template<typename... Callables>
         constexpr auto overload_impl(Callables &&... callables) noexcept
@@ -65,7 +65,7 @@ namespace fun
     template<typename... Callables>
     [[nodiscard]] constexpr auto overload(Callables &&... callables) noexcept
     {
-        return overload_impl(class_wrapper_t<Callables>(std::forward<Callables>(callables)) ...);
+        return detail::overload_impl(class_wrapper_t<Callables>(std::forward<Callables>(callables)) ...);
     }
 }
-#endif //FUNCTIONAL_OVERLOAD_HPP
+#endif //FUN_OVERLOAD_HPP
