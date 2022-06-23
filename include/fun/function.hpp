@@ -44,15 +44,15 @@ namespace fun
         static std::string_view const fptr_name;
         static std::string_view const class_name;
 
-        constexpr function() noexcept: fptr{default_function<Return, Args ...>} {}
+        constexpr function() noexcept : fptr{default_function<Return, Args ...>} {}
 
         constexpr function(function<Return, Args ...> const &other) noexcept = default;
 
-        constexpr function(Return (*func)(Args ...)) noexcept: fptr{func} {}
+        constexpr function(Return (*func)(Args ...)) noexcept : fptr{func} {}
 
         template<typename Lambda>
-        requires std::is_convertible_v<std::remove_cvref<Lambda>, decltype(fptr)>
-        constexpr function(Lambda &&lambda) noexcept : fptr{std::forward<Lambda>(lambda)} {}
+        requires std::is_convertible_v<std::decay_t<Lambda>, decltype(fptr)>
+        constexpr function(Lambda const &lambda) noexcept : fptr{lambda} {}
 
         constexpr function &operator=(Return (*func)(Args ...)) noexcept
         {
@@ -64,15 +64,15 @@ namespace fun
         {
             if (this == &other)
                 return *this;
-            this->fptr = other.fptr;
+            fptr = other.fptr;
             return *this;
         }
 
         template<typename Lambda>
-        requires std::is_convertible_v<std::remove_cvref<Lambda>, decltype(fptr)>
-        constexpr function &operator=(Lambda &&lambda)
+        requires std::is_convertible_v<std::decay_t<Lambda>, decltype(fptr)>
+        constexpr function &operator=(Lambda const &lambda) noexcept
         {
-            fptr = std::forward<lambda>(lambda);
+            fptr = lambda;
             return *this;
         }
 
@@ -82,10 +82,10 @@ namespace fun
          * @param   args Pack of arguments used to call the function
          * @return  A value of type Return, the result of the function call
          */
-        [[nodiscard]] constexpr auto operator()(Args ... args) const
+        [[nodiscard]] constexpr auto operator()(Args &&... args) const noexcept(noexcept(fptr(std::forward<Args>(args) ...)))
         requires (!std::is_void_v<Return>)
         {
-            return fptr(args ...);
+            return fptr(std::forward<Args>(args) ...);
         }
 
         /**
@@ -94,10 +94,10 @@ namespace fun
         * @param    args Pack of arguments used to call the function
         * @return   A value of type Return, the result of the function call
         */
-        constexpr auto operator()(Args ... args) const
+        constexpr auto operator()(Args &&... args) const noexcept(noexcept(fptr(std::forward<Args>(args) ...)))
         requires std::is_void_v<Return>
         {
-            fptr(args ...);
+            fptr(std::forward<Args>(args) ...);
         }
 
         /**
@@ -110,28 +110,35 @@ namespace fun
         template<typename... FrontArgs>
         [[nodiscard]] constexpr auto bind_front(FrontArgs &&... front_args) const noexcept
         {
-            return [...front_args = std::forward<FrontArgs>(front_args), &fptr = *this](auto &&... rest_args)
-            {
-                return fptr(front_args ..., rest_args ...);
-            };
+            return [...front_args = std::forward<FrontArgs>(front_args), &fptr = *this]
+                <typename... RestArgs>(RestArgs &&... rest_args)
+                noexcept(noexcept(fptr(std::forward<FrontArgs>(front_args) ..., std::forward<RestArgs>(rest_args) ...))) -> Return {
+                    if constexpr (std::is_void_v<Return>)
+                        fptr(std::forward<FrontArgs>(front_args) ..., std::forward<RestArgs>(rest_args) ...);
+                    else
+                        return fptr(std::forward<FrontArgs>(front_args) ..., std::forward<RestArgs>(rest_args) ...);
+                };
         }
 
         /**
          * Returns a lambda that captures the functional composition of this object and the received object.
          * f.composed_with(g)(x) <=> (f o g)(x) <=> f(g(x))
          *
-         * @tparam  ResultArgs The arguments received by the composition result
-         * @param   other_func A constant reference to the composition target
+         * @tparam  OtherArgs   The arguments received by the composition result
+         * @param   other_func  A constant reference to the composition target
          * @return  A lambda that represents the composition
          */
-        template<typename... ResultArgs>
+        template<typename... OtherArgs>
         requires (sizeof... (Args) == 1)
-        [[nodiscard]] constexpr auto composed_with(function<Args ..., ResultArgs ...> const &other_func) const noexcept
+        [[nodiscard]] constexpr auto composed_with(function<Args ..., OtherArgs ...> const &other_func) const noexcept
         {
-            return [&other_func = other_func, &fptr = *this](ResultArgs ... args)
-            {
-                return fptr(other_func(args ...));
-            };
+            return [&other_func, &fptr = *this](OtherArgs &&... args)
+                noexcept(noexcept(fptr(other_func(std::forward<OtherArgs>(args) ...)))) -> Return {
+                    if constexpr (std::is_void_v<Return>)
+                        return fptr(other_func(std::forward<OtherArgs>(args) ...));
+                    else
+                        return fptr(other_func(std::forward<OtherArgs>(args) ...));
+                };
         }
     };
 
@@ -141,10 +148,10 @@ namespace fun
         char const *result_name = typeid(T).name();
 #ifdef FUN_GCC
         // De-mangling uses GCC-specific functions.
-    int error_code{};
-    char *demangled_name = abi::__cxa_demangle(result_name, nullptr, nullptr, &error_code);
-    if (!error_code)
-        result_name = demangled_name;
+        int error_code{};
+        char *demangled_name = abi::__cxa_demangle(result_name, nullptr, nullptr, &error_code);
+        if (!error_code)
+            result_name = demangled_name;
 #endif
         return result_name;
     }
