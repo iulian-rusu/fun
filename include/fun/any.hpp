@@ -23,7 +23,7 @@ namespace fun
         template<typename T>
         constexpr bool operator==(T const &) const noexcept { return true; }
 
-        // Requires unevaluated context
+        // Doesn't have a definition anywhere
         template<typename T>
         constexpr explicit(false) operator T() const noexcept;
     };

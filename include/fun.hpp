@@ -3,7 +3,8 @@
 
 #include <fun/overload.hpp>
 #include <fun/curry.hpp>
-#include <fun/sink.hpp>
+#include <fun/nullsink.hpp>
 #include <fun/with_arity.hpp>
+#include <fun/literals.hpp>
 
 #endif // FUN_H

@@ -5,7 +5,7 @@
 #include <functional>
 #include <fun/utility.hpp>
 
-namespace fun
+namespace fun::traits
 {
     /**
      * std::is_function<T> is not std::true_type when T is a reference or pointer to a function
@@ -59,7 +59,7 @@ namespace fun
     using is_callable = detail::is_callable_impl<std::decay_t<T>>;
 
     template<typename T>
-    constexpr bool is_callable_v = is_callable<T>::value;
+    inline constexpr bool is_callable_v = is_callable<T>::value;
 
     template<typename T>
     concept callable = is_callable_v<T>;
@@ -67,10 +67,10 @@ namespace fun
     namespace detail
     {
         template<typename, typename>
-        struct is_invocable_with_arity_impl;
+        struct is_callable_with_arity_impl;
 
         template<typename F, std::size_t... Indices>
-        struct is_invocable_with_arity_impl<F, std::index_sequence<Indices ...>>
+        struct is_callable_with_arity_impl<F, std::index_sequence<Indices ...>>
         {
             static constexpr bool value = requires (F &&f) {
                 std::invoke(std::forward<F>(f), rvalue<Indices>() ...);
@@ -81,12 +81,19 @@ namespace fun
     }
 
     /**
-     * Concept that requires a callable to be invocable with exactly N arguments.
+     * Type trait that detects if an instance of some type can be
+     * invoked with exactly N arguments for operator().
      *
      * @tparam F    The callable type
      * @tparam N    The required number of arguments
      */
     template<typename F, std::size_t N>
-    concept invocable_with_arity = detail::is_invocable_with_arity_impl<F, std::make_index_sequence<N>>::value;
+    using is_callable_with_arity = detail::is_callable_with_arity_impl<F, std::make_index_sequence<N>>;
+
+    template<typename F, std::size_t N>
+    inline constexpr bool is_callable_with_arity_v = is_callable_with_arity<F, N>::value;
+
+    template<typename F, std::size_t N>
+    concept callable_with_arity = is_callable_with_arity_v<F, N>;
 }
 #endif //FUN_FUNCTIONAL_TRAITS_HPP

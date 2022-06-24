@@ -38,3 +38,33 @@ std::cout << original(1, 2, 3) << '\n';  // 6
 std::cout << curried(1)(2)(3) << '\n';   // 6
 std::cout << uncurried(1, 2, 3) << '\n'; // 6
 ```
+
+## Null sinks
+
+The `nullsink<N>` function template can be used to create a callable object which
+consumes exactly `N` arguments of any type and discards them. 
+Optionally, it can also invoke a given callback function (which takes no arguments).
+Its `operator()` requires an implicit conversion, giving it lower overload resolution priority
+than exact signature matches. 
+
+In the example below, `nullsink<4>` can consume any 4 argument types, but will only
+be called in the last line because the other two overloads are better matches.
+
+```cpp
+using namespace fun::literals;
+using fun::tag;
+
+auto guess = fun::curry(
+    fun::overload(
+        [](tag<1>, tag<2>, tag<3>, tag<4>) { return "you guessed 1234!"; },
+        [](tag<1>, tag<3>, tag<3>, tag<7>) { return "you guessed 1337!"; },
+        fun::nullsink<4>([] { return "incorrect guess!"; })
+    )
+);
+std::cout << guess(1_t)(2_t)(3_t)(4_t) << '\n';
+std::cout << guess(1_t)(3_t)(3_t)(7_t) << '\n';
+std::cout << guess(2_t)(2_t)(3_t)(4_t) << '\n'; // This will call the "null sink"
+```
+
+**Note:** 
+Some library features might not work with `mutable` (🤢) lambda expressions.

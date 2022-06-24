@@ -7,7 +7,6 @@
 #endif
 
 #include <string>
-#include <fun/functional_traits.hpp>
 
 // Include GCC-specific name de-mangling header
 #ifdef FUN_GCC
@@ -50,7 +49,7 @@ namespace fun
 
         constexpr function(Return (*func)(Args ...)) noexcept : fptr{func} {}
 
-        template<typename Lambda>
+        template<std::invocable<Args ...> Lambda>
         requires std::is_convertible_v<std::decay_t<Lambda>, decltype(fptr)>
         constexpr function(Lambda const &lambda) noexcept : fptr{lambda} {}
 
@@ -68,7 +67,7 @@ namespace fun
             return *this;
         }
 
-        template<typename Lambda>
+        template<std::invocable<Args ...> Lambda>
         requires std::is_convertible_v<std::decay_t<Lambda>, decltype(fptr)>
         constexpr function &operator=(Lambda const &lambda) noexcept
         {
@@ -113,10 +112,7 @@ namespace fun
             return [...front_args = std::forward<FrontArgs>(front_args), &fptr = *this]
                 <typename... RestArgs>(RestArgs &&... rest_args)
                 noexcept(noexcept(fptr(std::forward<FrontArgs>(front_args) ..., std::forward<RestArgs>(rest_args) ...))) -> Return {
-                    if constexpr (std::is_void_v<Return>)
-                        fptr(std::forward<FrontArgs>(front_args) ..., std::forward<RestArgs>(rest_args) ...);
-                    else
-                        return fptr(std::forward<FrontArgs>(front_args) ..., std::forward<RestArgs>(rest_args) ...);
+                    return fptr(std::forward<FrontArgs>(front_args) ..., std::forward<RestArgs>(rest_args) ...);
                 };
         }
 
@@ -134,10 +130,7 @@ namespace fun
         {
             return [&other_func, &fptr = *this](OtherArgs &&... args)
                 noexcept(noexcept(fptr(other_func(std::forward<OtherArgs>(args) ...)))) -> Return {
-                    if constexpr (std::is_void_v<Return>)
-                        return fptr(other_func(std::forward<OtherArgs>(args) ...));
-                    else
-                        return fptr(other_func(std::forward<OtherArgs>(args) ...));
+                    return fptr(other_func(std::forward<OtherArgs>(args) ...));
                 };
         }
     };
@@ -166,12 +159,12 @@ namespace fun
     using action = function<void, Args ...>;
 
     template<typename T, typename U>
-    using comparator = function<bool, arg_t<T>, arg_t<U>>;
+    using comparator = function<bool, T, U>;
 
     template<typename T>
-    using predicate = function<bool, arg_t<T>>;
+    using predicate = function<bool, T>;
 
     template<typename Return, typename T = Return>
-    using transform = function<Return, arg_t<T>>;
+    using transform = function<Return, T>;
 }
 #endif //FUN_FUNCTION_HPP

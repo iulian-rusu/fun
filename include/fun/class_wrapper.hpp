@@ -1,13 +1,14 @@
 #ifndef FUN_CLASS_WRAPPER_HPP
 #define FUN_CLASS_WRAPPER_HPP
 
-#include<fun/function.hpp>
+#include <fun/function.hpp>
+#include <fun/functional_traits.hpp>
 
 namespace fun
 {
     namespace detail
     {
-        template<typename T, bool IsClass = std::is_class_v<T>, bool IsCallable = is_callable_v<T>>
+        template<typename T, bool IsClass = std::is_class_v<T>, bool IsCallable = traits::is_callable_v<T>>
         struct class_wrapper_impl
         {
             using type = T;
@@ -20,7 +21,7 @@ namespace fun
         };
 
         template<typename T>
-        struct class_wrapper_impl<T, false, false> {};
+        struct class_wrapper_impl<T, false, false> {}; // It's neither a class nor a callable :(
     }
 
     /**

@@ -40,7 +40,7 @@ namespace fun
         {
             if constexpr (sizeof... (Args) == 0)
             {
-                static_assert(!is_callable_v<std::invoke_result_t<F &&, Arg &&>>, "not enough parameters");
+                static_assert(!traits::is_callable_v<std::invoke_result_t<F &&, Arg &&>>, "not enough parameters");
                 return std::invoke(std::forward<F>(f), std::forward<Arg>(arg));
             }
             else
@@ -63,7 +63,7 @@ namespace fun
      * @param f     The callable object being adapted
      * @return      A lambda expression which behaves as a curried version of the original callable
      */
-    template<typename F>
+    template<traits::callable F>
     [[nodiscard]] constexpr decltype(auto) curry(F &&f) noexcept
     {
         if constexpr (requires{ std::invoke(std::forward<F>(f)); })
@@ -81,7 +81,7 @@ namespace fun
      * @param f     The curried callable
      * @return      A lambda expression which behaves as a non-curried version of the function
      */
-    template<typename F>
+    template<traits::callable F>
     [[nodiscard]] constexpr decltype(auto) uncurry(F &&f) noexcept
     {
         if constexpr (requires { std::invoke(std::forward<F>(f)); })

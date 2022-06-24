@@ -24,7 +24,7 @@ namespace fun
          * @param   callables The actual callable objects to be forwarded
          * @return  A new overload set that contains new and old callables
          */
-        template<typename... MoreCallables>
+        template<traits::callable... MoreCallables>
         [[nodiscard]] constexpr auto extend(MoreCallables &&... callables) const noexcept
         {
             return extend_impl(std::forward<class_wrapper_t<MoreCallables>>(class_wrapper_t<MoreCallables>(callables))...);
@@ -62,7 +62,7 @@ namespace fun
      * @param   callables The callable objects
      * @return  The overload set instance
      */
-    template<typename... Callables>
+    template<traits::callable... Callables>
     [[nodiscard]] constexpr auto overload(Callables &&... callables) noexcept
     {
         return detail::overload_impl(class_wrapper_t<Callables>(std::forward<Callables>(callables)) ...);
