@@ -1,5 +1,4 @@
 # Functional utilities for C++.
-
 This is a small C++ functional programming playground. It includes
 a few utility classes and wrapper objects for function pointers.
 
@@ -20,10 +19,15 @@ and generates a functor which behaves as an overload set for the given callables
 auto type_name = fun::overload(
         [](int) { return "int"; },
         [](double) { return "double"; },
+        [](auto) { return "unknown"; }
 );
 std::cout << type_name(3435) << '\n'; // "int"
 std::cout << type_name(3.14) << '\n'; // "double"
+std::cout << type_name("ab") << '\n'; // "unknown"
 ```
+**Note:**
+Overloading might not work as expected when using `mutable` (🤢) lambda expressions.
+
 ## Currying
 Currying is the technique of converting a function that takes multiple arguments into a sequence of functions that each takes a single argument.
 Using the `curry` function, a callable object can be adapted to
@@ -65,6 +69,3 @@ std::cout << guess(1_t)(2_t)(3_t)(4_t) << '\n';
 std::cout << guess(1_t)(3_t)(3_t)(7_t) << '\n';
 std::cout << guess(2_t)(2_t)(3_t)(4_t) << '\n'; // This will call the "null sink"
 ```
-
-**Note:** 
-Some library features might not work with `mutable` (🤢) lambda expressions.
