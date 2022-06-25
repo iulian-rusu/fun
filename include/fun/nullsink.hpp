@@ -1,7 +1,6 @@
 #ifndef FUN_NULLSINK_HPP
 #define FUN_NULLSINK_HPP
 
-#include <tuple>
 #include <functional>
 #include <fun/utility.hpp>
 
@@ -12,9 +11,9 @@ namespace fun
         template<std::invocable F, std::size_t... Indices>
         constexpr decltype(auto) nullsink_impl(F &&f, std::index_sequence<Indices ...> &&) noexcept
         {
-            return [captured = std::tuple<F>{std::forward<F>(f)}]
-                (generate_type<Indices, any>...) noexcept(std::is_nothrow_invocable_v<F>) -> decltype(auto) {
-                    return std::invoke(std::get<0>(captured));
+            return [f = std::forward<F>(f)](generate_type<Indices, any>...)
+                noexcept(std::is_nothrow_invocable_v<F>) -> decltype(auto) {
+                    return std::invoke(f);
                 };
         }
     }

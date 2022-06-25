@@ -1,7 +1,6 @@
 #ifndef FUN_CURRY_HPP
 #define FUN_CURRY_HPP
 
-#include <tuple>
 #include <functional>
 
 namespace fun
@@ -24,14 +23,9 @@ namespace fun
             if constexpr (requires { std::invoke(std::forward<F>(f), std::forward<Args>(args) ...); })
                 return std::invoke(std::forward<F>(f), std::forward<Args>(args) ...);
             else
-                return [captured = std::tuple<F, Args ...>{std::forward<F>(f), std::forward<Args>(args) ...}]
+                return [f = std::forward<F>(f), ...args = std::forward<Args>(args)]
                     <typename Arg>(Arg &&arg) noexcept -> decltype(auto) {
-                        return std::apply(
-                            [&]<typename... Ts>(Ts &&... ts) noexcept -> decltype(auto) {
-                                return curry_impl(std::forward<Ts>(ts) ..., std::forward<Arg>(arg));
-                            },
-                            std::move(captured)
-                        );
+                        return curry_impl(f, args ..., std::forward<Arg>(arg));
                     };
         }
 
@@ -87,11 +81,11 @@ namespace fun
         if constexpr (requires { std::invoke(std::forward<F>(f)); })
             return std::forward<F>(f);
         else
-            return [captured = std::tuple<F>{std::forward<F>(f)}]
+            return [f = std::forward<F>(f)]
                 <typename Arg, typename... Args>(Arg &&arg, Args &&... args)
                 noexcept(std::is_nothrow_invocable_v<F, Arg &&>) -> decltype(auto) {
                     return detail::uncurry_impl(
-                        std::invoke(std::get<0>(captured), std::forward<Arg>(arg)),
+                        std::invoke(f, std::forward<Arg>(arg)),
                         std::forward<Args>(args) ...
                     );
                 };
