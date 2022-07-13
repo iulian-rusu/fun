@@ -9,7 +9,7 @@ namespace fun
 
     // Helper type used to map an integer sequence to a type sequence
     template<std::size_t, typename T>
-    using generate_type = T;
+    using map_sequence = T;
 
     // Mechanism used to associate an integral value with a type
     template<std::intmax_t ID>

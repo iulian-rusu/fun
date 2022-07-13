@@ -11,7 +11,7 @@ namespace fun
         template<std::invocable F, std::size_t... Indices>
         constexpr decltype(auto) nullsink_impl(F &&f, std::index_sequence<Indices ...> &&) noexcept
         {
-            return [f = std::forward<F>(f)](generate_type<Indices, any>...)
+            return [f = std::forward<F>(f)](map_sequence<Indices, any>...)
                 noexcept(std::is_nothrow_invocable_v<F>) -> decltype(auto) {
                     return std::invoke(f);
                 };

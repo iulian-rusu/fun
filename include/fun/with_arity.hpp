@@ -12,7 +12,7 @@ namespace fun
         constexpr decltype(auto) with_arity_impl(F &&f, std::index_sequence<Indices ...> &&) noexcept
         {
             return [f = std::forward<F>(f)]
-                <typename... Args>(generate_type<Indices, Args> &&... args)
+                <typename... Args>(map_sequence<Indices, Args> &&... args)
                 noexcept(std::is_nothrow_invocable_v<F, Args &&...>) -> decltype(auto) {
                     return std::invoke(f, std::forward<Args>(args) ...);
                 };

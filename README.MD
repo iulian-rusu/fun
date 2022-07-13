@@ -17,9 +17,9 @@ and generates a functor which behaves as an overload set for the given callables
 
 ```cpp
 auto type_name = fun::overload(
-        [](int) { return "int"; },
-        [](double) { return "double"; },
-        [](auto) { return "unknown"; }
+    [](int) { return "int"; },
+    [](double) { return "double"; },
+    [](auto) { return "unknown"; }
 );
 std::cout << type_name(3435) << '\n'; // "int"
 std::cout << type_name(3.14) << '\n'; // "double"

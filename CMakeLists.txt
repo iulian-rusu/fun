@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_C_COMPILER cc)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Compiler options
 if (MSVC)
     add_compile_options(/W4)
     if (CMAKE_BUILD_TYPE MATCHES Debug)
@@ -22,5 +23,19 @@ else()
     endif()
 endif()
 
-include_directories(include)
-add_executable(main main.cpp)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_compile_options(-fconcepts-diagnostics-depth=3)
+endif()
+
+# Main library target
+add_library(fun INTERFACE)
+target_include_directories(fun INTERFACE include/)
+
+# Installation
+install(DIRECTORY include/fun DESTINATION include FILES_MATCHING PATTERN *.hpp)
+
+# Building examples
+option(FUN_BUILD_EXAMPLES "build examples" ON)
+if (${FUN_BUILD_EXAMPLES})
+    add_subdirectory(example/)
+endif()

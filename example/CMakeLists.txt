@@ -1,0 +1,10 @@
+function(fun_add_example filename)
+    set(target_name example_${filename})
+    add_executable(${target_name} ${filename}.cpp)
+    target_link_libraries(${target_name} PUBLIC fun)
+    set_property(TARGET ${target_name} PROPERTY CXX_STANDARD 20)
+endfunction()
+
+fun_add_example(curry)
+fun_add_example(overload)
+fun_add_example(guess)
