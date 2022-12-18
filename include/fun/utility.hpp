@@ -5,7 +5,7 @@
 
 namespace fun
 {
-    inline constexpr auto noop = []() {};
+    inline constexpr auto noop = []() noexcept {};
 
     // Helper type used to map an integer sequence to a type sequence
     template<std::size_t, typename T>

@@ -16,31 +16,6 @@ namespace fun
     struct overload_set : Callables ...
     {
         using Callables::operator() ...;
-
-        /**
-         * Extends the current overload set with more callables.
-         *
-         * @tparam  MoreCallables The types of the callable objects to be added to the overload set
-         * @param   callables The actual callable objects to be forwarded
-         * @return  A new overload set that contains new and old callables
-         */
-        template<traits::callable... MoreCallables>
-        [[nodiscard]] constexpr auto extend(MoreCallables &&... callables) const noexcept
-        {
-            return extend_impl(std::forward<class_wrapper_t<MoreCallables>>(class_wrapper_t<MoreCallables>(callables))...);
-        }
-
-    private:
-        template<typename... MoreCallables>
-        constexpr auto extend_impl(MoreCallables &&... callables) const noexcept
-        {
-            using this_t = decltype(*this);
-
-            return overload_set<std::decay_t<this_t>, std::decay_t<MoreCallables> ...>{
-                std::forward<this_t>(*this),
-                std::forward<MoreCallables>(callables) ...
-            };
-        }
     };
 
     template<typename... Callables>

@@ -60,7 +60,7 @@ namespace fun
     template<traits::callable F>
     [[nodiscard]] constexpr decltype(auto) curry(F &&f) noexcept
     {
-        if constexpr (requires{ std::invoke(std::forward<F>(f)); })
+        if constexpr (requires { std::invoke(std::forward<F>(f)); })
             return std::forward<F>(f);
         else
             return detail::curry_impl(std::forward<F>(f));
