@@ -5,7 +5,18 @@
 
 namespace fun
 {
-    inline constexpr auto noop = []() noexcept {};
+    namespace detail
+    {
+        template<typename... Ts>
+        struct head_impl;
+
+        template<typename T, typename... Ts>
+        struct head_impl<T, Ts ...> : std::type_identity<T> {};
+    }
+
+    // Helper metafunciton used to extract the first type in a parameter pack
+    template<typename... Ts>
+    using head_t = typename detail::head_impl<Ts ...>::type;
 
     // Helper type used to map an integer sequence to a type sequence
     template<std::size_t, typename T>
@@ -20,7 +31,9 @@ namespace fun
     template<typename T> constexpr auto lvalue() noexcept -> decltype(std::declval<T &>());
 
     // Template to allow expansion with std::index_sequence
-    template<std::size_t = 0> constexpr auto rvalue() noexcept -> decltype(std::declval<any>());
-    template<std::size_t = 0> constexpr auto lvalue() noexcept -> decltype(std::declval<any &>());
+    template<std::size_t = 0> constexpr auto rvalue() noexcept -> any &&;
+    template<std::size_t = 0> constexpr auto lvalue() noexcept -> any &;
+
+    inline constexpr auto noop = []() noexcept {};
 }
 #endif //FUN_UTILITY_HPP

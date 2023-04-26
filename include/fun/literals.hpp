@@ -71,7 +71,7 @@ namespace fun
     namespace literals
     {
         template<char... Chars>
-        constexpr auto operator ""_t()
+        constexpr auto operator ""_t() noexcept
         {
             return tag<detail::parse({Chars ...})>{};
         }

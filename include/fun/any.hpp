@@ -23,9 +23,11 @@ namespace fun
         template<typename T>
         constexpr bool operator==(T const &) const noexcept { return true; }
 
-        // Doesn't have a definition anywhere
         template<typename T>
-        constexpr explicit(false) operator T() const noexcept;
+        constexpr explicit(false) operator T &() const noexcept;
+
+        template<typename T>
+        constexpr explicit(false) operator T &&() const noexcept;
     };
 }
 #endif //FUN_ANY_HPP

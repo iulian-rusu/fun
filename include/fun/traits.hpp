@@ -1,5 +1,5 @@
-#ifndef FUN_FUNCTIONAL_TRAITS_HPP
-#define FUN_FUNCTIONAL_TRAITS_HPP
+#ifndef FUN_TRAITS_HPP
+#define FUN_TRAITS_HPP
 
 #include <type_traits>
 #include <functional>
@@ -72,10 +72,8 @@ namespace fun::traits
         template<typename F, std::size_t... Indices>
         struct is_callable_with_arity_impl<F, std::index_sequence<Indices ...>>
         {
-            static constexpr bool value = requires (F &&f) {
-                std::invoke(std::forward<F>(f), rvalue<Indices>() ...);
-            } || requires (F &&f) {
-                std::invoke(std::forward<F>(f), lvalue<Indices>() ...);
+            static constexpr bool value = requires (F f) {
+                std::invoke(f, lvalue<Indices>() ...);
             };
         };
     }
@@ -96,4 +94,4 @@ namespace fun::traits
     template<typename F, std::size_t N>
     concept callable_with_arity = is_callable_with_arity_v<F, N>;
 }
-#endif //FUN_FUNCTIONAL_TRAITS_HPP
+#endif //FUN_TRAITS_HPP

@@ -2,6 +2,7 @@
 #define FUN_CURRY_HPP
 
 #include <functional>
+#include <fun/traits.hpp>
 
 namespace fun
 {
@@ -24,13 +25,13 @@ namespace fun
                 return std::invoke(std::forward<F>(f), std::forward<Args>(args) ...);
             else
                 return [f = std::forward<F>(f), ...args = std::forward<Args>(args)]
-                    <typename Arg>(Arg &&arg) noexcept -> decltype(auto) {
+                    <typename Arg>(Arg &&arg) noexcept(is_nothrow_if_invocable_v<F, Args..., Arg &&>) -> decltype(auto) {
                         return curry_impl(f, args ..., std::forward<Arg>(arg));
                     };
         }
 
         template<typename F, typename Arg, typename... Args>
-        constexpr decltype(auto) uncurry_impl(F &&f, Arg &&arg, Args &&... args) noexcept(is_nothrow_if_invocable_v<F &&, Arg &&>)
+        constexpr decltype(auto) uncurry_impl(F &&f, Arg &&arg, Args &&... args) noexcept(std::is_nothrow_invocable_v<F &&, Arg &&>)
         {
             if constexpr (sizeof... (Args) == 0)
             {

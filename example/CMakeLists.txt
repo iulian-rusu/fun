@@ -6,5 +6,5 @@ function(fun_add_example filename)
 endfunction()
 
 fun_add_example(curry)
-fun_add_example(overload)
 fun_add_example(guess)
+fun_add_example(match)

@@ -13,6 +13,8 @@
 #include <cxxabi.h>
 #endif
 
+#include <fun/utility.hpp>
+
 namespace fun
 {
     /**
@@ -28,6 +30,9 @@ namespace fun
             return {};
     }
 
+    template<typename Signature>
+    class function;
+
     /**
      * Template for wrapper over a function pointer.
      *
@@ -35,7 +40,7 @@ namespace fun
      * @tparam  Args The optional parameter types taken by the function
      */
     template<typename Return, typename... Args>
-    class function
+    class function<Return(Args ...)>
     {
         Return (*fptr)(Args ...);
 
@@ -45,7 +50,7 @@ namespace fun
 
         constexpr function() noexcept : fptr{default_function<Return, Args ...>} {}
 
-        constexpr function(function<Return, Args ...> const &other) noexcept = default;
+        constexpr function(function<Return(Args ...)> const &other) noexcept = default;
 
         constexpr function(Return (*func)(Args ...)) noexcept : fptr{func} {}
 
@@ -59,7 +64,7 @@ namespace fun
             return *this;
         }
 
-        constexpr function &operator=(function<Return, Args ...> const &other) noexcept
+        constexpr function &operator=(function<Return(Args ...)> const &other) noexcept
         {
             if (this == &other)
                 return *this;
@@ -126,7 +131,7 @@ namespace fun
          */
         template<typename... OtherArgs>
         requires (sizeof... (Args) == 1)
-        [[nodiscard]] constexpr auto composed_with(function<Args ..., OtherArgs ...> const &other_func) const noexcept
+        [[nodiscard]] constexpr auto composed_with(function<head_t<Args ...>(OtherArgs ...)> const &other_func) const noexcept
         {
             return [&other_func, &fptr = *this](OtherArgs &&... args)
                 noexcept(noexcept(fptr(other_func(std::forward<OtherArgs>(args) ...)))) -> Return {
@@ -150,21 +155,21 @@ namespace fun
     }
 
     template<typename Return, typename... Args>
-    std::string_view const function<Return, Args ...>::fptr_name = get_type_name<Return (*)(Args ...)>();
+    std::string_view const function<Return(Args ...)>::fptr_name = get_type_name<Return (*)(Args ...)>();
 
     template<typename Return, typename... Args>
-    std::string_view const function<Return, Args ...>::class_name = get_type_name<function>();
+    std::string_view const function<Return(Args ...)>::class_name = get_type_name<function>();
 
     template<typename... Args>
-    using action = function<void, Args ...>;
+    using action = function<void(Args ...)>;
 
     template<typename T, typename U>
-    using comparator = function<bool, T, U>;
+    using comparator = function<bool(T, U)>;
 
     template<typename T>
-    using predicate = function<bool, T>;
+    using predicate = function<bool(T)>;
 
     template<typename Return, typename T = Return>
-    using transform = function<Return, T>;
+    using transform = function<Return(T)>;
 }
 #endif //FUN_FUNCTION_HPP

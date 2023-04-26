@@ -2,7 +2,7 @@
 #define FUN_CLASS_WRAPPER_HPP
 
 #include <fun/function.hpp>
-#include <fun/functional_traits.hpp>
+#include <fun/traits.hpp>
 
 namespace fun
 {
