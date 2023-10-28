@@ -1,7 +1,7 @@
 #ifndef FUN_ANY_HPP
 #define FUN_ANY_HPP
 
-#include <utility>
+#include <compare>
 
 namespace fun
 {

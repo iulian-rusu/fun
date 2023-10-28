@@ -1,19 +1,9 @@
-# Functional utilities for C++.
-This is a small C++ functional programming playground. It includes
-a few utility classes and wrapper objects for function pointers.
-
-## Function wrappers
-The `function<Return, Args ...>` class template provides an API for working with functions.
-The first template parameter is always required and represents the return type of the function.
-The following template parameters are all optional and represent the types of the arguments taken by the function.
-Any `function` object that doesn't return `void` has its `operator()` automatically marked as `[[nodiscard]]`.
-The `default_function` template allows default-constructing functions
-that return default-constructible types. 
+# Fun utilities for C++.
+This is a C++20 library with random utilities and fun tricks that make use of some obscure C++ techniques.
 
 ## Overloading
-The library provides a utility function called `overload` that
-takes a variable number of callable objects (including C-style function pointers)
-and generates a functor which behaves as an overload set for the given callables.
+The library provides a function called `fun::overload` that takes a variable number of callable objects 
+(including function pointers) and generates a functor which behaves as an overload set for the given callables.
 
 ```cpp
 auto type_name = fun::overload(
@@ -25,14 +15,11 @@ std::cout << type_name(3435) << '\n'; // "int"
 std::cout << type_name(3.14) << '\n'; // "double"
 std::cout << type_name("ab") << '\n'; // "unknown"
 ```
-**Note:**
-Overloading might not work as expected when using `mutable` (🤢) lambda expressions.
 
 ## Currying
-Currying is the technique of converting a function that takes multiple arguments into a sequence of functions that each takes a single argument.
-Using the `curry` function, a callable object can be adapted to
-receive its arguments one-by-one.  This operation can be undone with the
-`uncurry` function.
+Currying is the technique of converting a function that takes multiple arguments into a sequence of functions
+that each takes a single argument. Using the `fun::curry` function, a callable object can be adapted to receive
+its arguments one-by-one. This operation can be undone with the `fun::uncurry` function.
 
 ```cpp
 auto original = [](int x, int y, int z) { return x + y + z; };
@@ -43,29 +30,65 @@ std::cout << curried(1)(2)(3) << '\n';   // 6
 std::cout << uncurried(1, 2, 3) << '\n'; // 6
 ```
 
-## Null sinks
+## Member pointers
 
-The `nullsink<N>` function template can be used to create a callable object which
-consumes exactly `N` arguments of any type and discards them. 
-Optionally, it can also invoke a given callback function (which takes no arguments).
-Its `operator()` requires an implicit conversion, giving it lower overload resolution priority
-than exact signature matches. 
+As we know, encapsulation in C++ is just an illusion. After all, private class members are just a `reinterpret_cast`
+away from being accessible. However, this library can do it without undefined behavior by (ab)using member pointers.
 
-In the example below, `nullsink<4>` can consume any 4 argument types, but will only
-be called in the last line because the other two overloads are better matches.
+Consider the following class definitions:
+```cpp
+class vault
+{
+    std::string_view _password = "secret";
+};
+
+class earth
+{
+    double _gravity = 9.807;
+    std::size_t _radius = 6371000;
+};
+```
+
+The `fun::enable_access` template provides a way to enable public access to any class member.
+In the example below, the private member `_password` becomes accessible through `password_accessor::ptr`.
+This is possible because explicit template instantiations do not follow usual access restriction rules, 
+providing a legal way to obtain a pointer to a private member.
+```cpp
+struct password_accessor
+{
+    static inline std::string_view vault::*ptr = nullptr;
+};
+
+// Explicit instantiation: password is effectively public now
+template struct fun::enable_access<&vault::_password, password_accessor>;
+
+int main()
+{
+    vault v{};
+    std::cout << "The password is " << v.*password_accessor::ptr << '\n';
+}
+```
+
+A more generic interface is offered by `fun::member_pointers`. This template offers inner metafunctions which can 
+inject the selected memeber pointers into callable objects. Injection can be done in multiple ways:
+* Using `access`, which will pass all pointers at once to a supplied callable.
+* Using `visit`, which will invoke a given visitor for each pointer type.
+* Using `match`, which takes a list of callables and injects each pointer type into its matching signature.
 
 ```cpp
-using namespace fun::literals;
-using fun::tag;
-
-auto guess = fun::curry(
-    fun::overload(
-        [](tag<1>, tag<2>, tag<3>, tag<4>) { return "you guessed 1234!"; },
-        [](tag<1>, tag<3>, tag<3>, tag<7>) { return "you guessed 1337!"; },
-        fun::nullsink<4>([] { return "incorrect guess!"; })
-    )
-);
-std::cout << guess(1_t)(2_t)(3_t)(4_t) << '\n';
-std::cout << guess(1_t)(3_t)(3_t)(7_t) << '\n';
-std::cout << guess(2_t)(2_t)(3_t)(4_t) << '\n'; // This will call the "null sink"
+template struct fun::member_pointers<&vault::_password, &earth::_gravity, &earth::_radius>::match<
+    [](double earth::*ptr) { // Will be called with &earth::_gravity
+        earth e{};
+        std::cout << "Gravity is " << e.*ptr << '\n';
+        e.*ptr = 99.999;
+        std::cout << "Gravity modified to " << e.*ptr << '\n';
+    },
+    [](std::string_view vault::*ptr) { // Will be called with &vault::_password
+        vault v{};
+        std::cout << "The password is " << v.*ptr << '\n';
+    },
+    [](auto other) { // Will be called when no other signature works
+        std::cout << "Unknown type: " << typeid(other).name() << '\n';
+    }
+>;
 ```

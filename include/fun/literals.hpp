@@ -10,16 +10,17 @@ namespace fun
         // Shamelessly stolen from Boost.Hana:
         // https://github.com/boostorg/hana/blob/master/include/boost/hana/bool.hpp
 
-        constexpr int to_int(char c)
+        constexpr int to_int(unsigned char c)
         {
-            return [=] {
-                if (c >= 'A' && c <= 'F')
-                    return static_cast<int>(c) - static_cast<int>('A') + 10;
-                else if (c >= 'a' && c <= 'f')
-                    return static_cast<int>(c) - static_cast<int>('a') + 10;
-                else
-                    return static_cast<int>(c) - static_cast<int>('0');
-            }();
+            int const ord = static_cast<int>(c);
+
+            if (c >= 'A' && c <= 'F')
+                return ord - static_cast<int>('A') + 10;
+
+            if (c >= 'a' && c <= 'f')
+                return ord - static_cast<int>('a') + 10;
+
+            return ord - static_cast<int>('0');
         }
 
         template<std::size_t N>
@@ -35,19 +36,16 @@ namespace fun
 
                 if (is_hex)
                 {
-                    //0xDEADBEEF (hexadecimal)
                     base = 16;
                     offset = 2;
                 }
                 else if (is_binary)
                 {
-                    //0b101011101 (binary)
                     base = 2;
                     offset = 2;
                 }
                 else if (starts_with_zero)
                 {
-                    //012345 (octal)
                     base = 8;
                     offset = 1;
                 }

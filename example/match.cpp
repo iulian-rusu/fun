@@ -7,7 +7,7 @@ int main()
 {
     auto type_name = []<typename Variant>(Variant &&var) -> std::string_view {
         return fun::match(
-            var,
+            std::forward<Variant>(var),
             [](int) { return "int"; },
             [](double) { return "double"; },
             [](auto &&) { return "unknown"; }

@@ -1,36 +1,38 @@
 #ifndef FUN_CURRY_HPP
 #define FUN_CURRY_HPP
 
+#include <concepts>
 #include <functional>
+#include <utility>
 #include <fun/traits.hpp>
 
 namespace fun
 {
     namespace detail
     {
-        template<typename F, typename... Args>
+        template<traits::callable F, typename... Args>
         struct is_nothrow_if_invocable : std::true_type {};
 
-        template<typename F, typename... Args>
+        template<traits::callable F, typename... Args>
         requires std::is_invocable_v<F, Args ...>
         struct is_nothrow_if_invocable<F, Args ...> : std::is_nothrow_invocable<F, Args ...> {};
 
-        template<typename F, typename... Args>
+        template<traits::callable F, typename... Args>
         inline constexpr bool is_nothrow_if_invocable_v = is_nothrow_if_invocable<F, Args ...>::value;
 
-        template<typename F, typename... Args>
+        template<traits::callable F, typename... Args>
         constexpr decltype(auto) curry_impl(F &&f, Args &&... args) noexcept(is_nothrow_if_invocable_v<F &&, Args &&...>)
         {
             if constexpr (requires { std::invoke(std::forward<F>(f), std::forward<Args>(args) ...); })
                 return std::invoke(std::forward<F>(f), std::forward<Args>(args) ...);
             else
-                return [f = std::forward<F>(f), ...args = std::forward<Args>(args)]
-                    <typename Arg>(Arg &&arg) noexcept(is_nothrow_if_invocable_v<F, Args..., Arg &&>) -> decltype(auto) {
+                return [f = std::forward<F>(f), ...args = std::forward<Args>(args)]<typename Arg>(Arg &&arg)
+                    noexcept(is_nothrow_if_invocable_v<F &&, Args &&..., Arg &&>) -> decltype(auto) {
                         return curry_impl(f, args ..., std::forward<Arg>(arg));
                     };
         }
 
-        template<typename F, typename Arg, typename... Args>
+        template<traits::callable F, typename Arg, typename... Args>
         constexpr decltype(auto) uncurry_impl(F &&f, Arg &&arg, Args &&... args) noexcept(std::is_nothrow_invocable_v<F &&, Arg &&>)
         {
             if constexpr (sizeof... (Args) == 0)
@@ -82,9 +84,8 @@ namespace fun
         if constexpr (requires { std::invoke(std::forward<F>(f)); })
             return std::forward<F>(f);
         else
-            return [f = std::forward<F>(f)]
-                <typename Arg, typename... Args>(Arg &&arg, Args &&... args)
-                noexcept(std::is_nothrow_invocable_v<F, Arg &&>) -> decltype(auto) {
+            return [f = std::forward<F>(f)]<typename Arg, typename... Args>(Arg &&arg, Args &&... args)
+                noexcept(std::is_nothrow_invocable_v<F &&, Arg &&>) -> decltype(auto) {
                     return detail::uncurry_impl(
                         std::invoke(f, std::forward<Arg>(arg)),
                         std::forward<Args>(args) ...

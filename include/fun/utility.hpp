@@ -5,28 +5,11 @@
 
 namespace fun
 {
-    namespace detail
-    {
-        template<typename... Ts>
-        struct head_impl;
-
-        template<typename T, typename... Ts>
-        struct head_impl<T, Ts ...> : std::type_identity<T> {};
-    }
-
-    // Helper metafunciton used to extract the first type in a parameter pack
-    template<typename... Ts>
-    using head_t = typename detail::head_impl<Ts ...>::type;
-
-    // Helper type used to map an integer sequence to a type sequence
-    template<std::size_t, typename T>
-    using map_sequence = T;
-
     // Mechanism used to associate an integral value with a type
     template<std::intmax_t ID>
     struct tag : std::integral_constant<std::intmax_t, ID>{};
 
-    // Utility functions used to get rvalues or lvalues of any type
+    // Utility functions used to get rvalues or lvalues of any type (in an unevaluated context)
     template<typename T> constexpr auto rvalue() noexcept -> decltype(std::declval<T>());
     template<typename T> constexpr auto lvalue() noexcept -> decltype(std::declval<T &>());
 
