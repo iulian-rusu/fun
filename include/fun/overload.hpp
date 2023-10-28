@@ -2,46 +2,51 @@
 #define FUN_OVERLOAD_HPP
 
 #include <variant>
-#include <fun/class_wrapper.hpp>
+#include <fun/function.hpp>
+#include <fun/traits.hpp>
 
 namespace fun
 {
+    namespace detail
+    {
+        template<traits::callable F>
+        struct callable_wrapper_impl : std::type_identity<F> {};
+
+        template<traits::callable F>
+        requires (!std::is_class_v<F>)
+        struct callable_wrapper_impl<F> : std::type_identity<decltype(function{std::declval<F>()})> {};
+
+        template<traits::callable F>
+        using callable_wrapper = typename detail::callable_wrapper_impl<F>::type;
+    }
+
     /**
      * A class that models the overload set of a series of callable objects.
      * All callable objects must have a different signature for their operator().
      * The result of calling operator() is determined using operator overloading rules.
      *
-     * @tparam  Callables The types of the callable objects that determine this functor's behaviour
+     * @tparam Fs   The types of the callable objects that determine this functor's behaviour
      */
-    template<typename... Callables>
-    struct overload_set : Callables ...
+    template<traits::callable... Fs>
+    struct overload_set : Fs ...
     {
-        using Callables::operator() ...;
+        using Fs::operator() ...;
     };
 
-    template<typename... Callables>
-    overload_set(Callables &&...) -> overload_set<class_wrapper_t<Callables> ...>;
-
-    namespace detail
-    {
-        template<typename... Callables>
-        constexpr auto overload_impl(Callables &&... callables) noexcept
-        {
-            return overload_set<std::remove_reference_t<Callables> ...>{std::forward<Callables>(callables) ...};
-        }
-    }
+    template<traits::callable... Fs>
+    overload_set(Fs &&...) -> overload_set<detail::callable_wrapper<std::remove_reference_t<Fs>> ...>;
 
     /**
      * Creates an overload set that contains all the given function signatures at once.
      *
-     * @tparam  Callables The types of the callable objects that will be combined into one overload set
-     * @param   callables The callable objects
+     * @tparam Fs   The types of the callable objects that will be combined into one overload set
+     * @param fs    The callable objects
      * @return  The overload set instance
      */
-    template<traits::callable... Callables>
-    [[nodiscard]] constexpr auto overload(Callables &&... callables) noexcept
+    template<traits::callable... Fs>
+    [[nodiscard]] constexpr auto overload(Fs &&... fs) noexcept(noexcept(overload_set{std::forward<Fs>(fs) ...}))
     {
-        return detail::overload_impl(class_wrapper_t<Callables>(std::forward<Callables>(callables)) ...);
+        return overload_set{std::forward<Fs>(fs) ...};
     }
 
     /**

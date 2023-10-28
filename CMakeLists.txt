@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(fun LANGUAGES VERSION 2.0 CXX)
 
-set(PROJECT_DESCRIPTION "Small C++ functional programming playground.")
+set(PROJECT_DESCRIPTION "Small C++ utility library.")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_C_COMPILER cc)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -31,11 +31,17 @@ endif()
 add_library(fun INTERFACE)
 target_include_directories(fun INTERFACE include/)
 
-# Installation
-install(DIRECTORY include/fun DESTINATION include FILES_MATCHING PATTERN *.hpp)
+# Building tests
+option(FUN_BUILD_TESTS "build tests" ON)
+if(${FUN_BUILD_TESTS})
+    add_subdirectory(test/)
+endif()
 
 # Building examples
 option(FUN_BUILD_EXAMPLES "build examples" ON)
 if (${FUN_BUILD_EXAMPLES})
     add_subdirectory(example/)
 endif()
+
+# Installation
+install(DIRECTORY include/fun DESTINATION include FILES_MATCHING PATTERN *.hpp)

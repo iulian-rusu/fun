@@ -1,8 +1,8 @@
 #ifndef FUN_TRAITS_HPP
 #define FUN_TRAITS_HPP
 
-#include <type_traits>
 #include <functional>
+#include <type_traits>
 #include <fun/utility.hpp>
 
 namespace fun::traits
@@ -15,36 +15,31 @@ namespace fun::traits
 
     namespace detail
     {
-        template<typename T, bool IsClass = std::is_class_v<T>>
-        struct is_callable_impl : is_function<T> {};
+        template<typename F>
+        struct is_callable_impl : is_function<F> {};
 
         // This is some black magic
-        template<typename T>
-        struct is_callable_impl<T, true>
+        template<typename F>
+        requires std::is_class_v<F>
+        struct is_callable_impl<F>
         {
             struct fallback
             {
                 void operator()() {};
             };
 
-            struct combined : T, fallback {};
+            struct derived : F, fallback {};
 
-            template<typename U, U>
-            class is_instance_of;
+            template<typename T, T>
+            struct instance_of;
 
             template<typename>
-            static std::true_type check(...)
-            {
-                return {};
-            }
+            static std::true_type check(...) { return {}; }
 
-            template<typename C>
-            static std::false_type check(is_instance_of<void (fallback::*)(), &C::operator()> *)
-            {
-                return {};
-            }
+            template<typename T>
+            static std::false_type check(instance_of<void (fallback::*)(), &T::operator()> *) { return {}; }
 
-            using type = decltype(check<combined>(nullptr));
+            using type = decltype(check<derived>(nullptr));
             static constexpr bool value = type{};
         };
     }
@@ -53,16 +48,16 @@ namespace fun::traits
      * Type trait that detects if an instance of some type can be
      * invoked with any signature of operator().
      *
-     * @tparam  T The type checked for being a callable
+     * @tparam F    The type checked for being a callable
      */
-    template<typename T>
-    using is_callable = detail::is_callable_impl<std::decay_t<T>>;
+    template<typename F>
+    using is_callable = detail::is_callable_impl<std::decay_t<F>>;
 
-    template<typename T>
-    inline constexpr bool is_callable_v = is_callable<T>::value;
+    template<typename F>
+    inline constexpr bool is_callable_v = is_callable<F>::value;
 
-    template<typename T>
-    concept callable = is_callable_v<T>;
+    template<typename F>
+    concept callable = is_callable_v<F>;
 
     namespace detail
     {
@@ -81,6 +76,8 @@ namespace fun::traits
     /**
      * Type trait that detects if an instance of some type can be
      * invoked with exactly N arguments for operator().
+     * Additionally, the call signature must be unambiguous for the given arity,
+     * otherwise the result will be false.
      *
      * @tparam F    The callable type
      * @tparam N    The required number of arguments
