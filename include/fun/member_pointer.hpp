@@ -11,7 +11,9 @@ namespace fun
     concept member_pointer = std::is_member_pointer_v<Ptr>;
 
     template<typename T, typename Ptr>
-    concept member_pointer_accessor = member_pointer<Ptr> && std::is_same_v<Ptr, decltype(T::ptr)>;
+    concept member_pointer_accessor = member_pointer<Ptr> && requires (Ptr ptr) {
+        T::ptr = ptr;
+    };
 
     /**
      * An explicit instantion of this template enables access to a (possibly private) member pointer
